@@ -1,11 +1,11 @@
 package bond.memo.mmorpg.handler;
 
 import bond.memo.mmorpg.models.PlayerActions;
-import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.GeneratedMessageLite;
 
 public class JoinHandler extends BaseHandler implements Handler {
 
-    public JoinHandler(GeneratedMessage msg) {
+    public JoinHandler(GeneratedMessageLite msg) {
         super(msg);
     }
 

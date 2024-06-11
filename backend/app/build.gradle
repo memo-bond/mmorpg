@@ -28,6 +28,21 @@ dependencies {
     implementation libs.guava
 }
 
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:4.27.1'
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option 'lite'
+                }
+            }
+        }
+    }
+}
+
 // Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
@@ -48,7 +63,10 @@ tasks.named('test') {
 sourceSets {
     main {
         java {
-            srcDirs += 'src/main/proto'
+            srcDirs = ['src/main/java', 'build/generated/source/proto/main/java']
+        }
+        proto {
+            srcDirs = ['src/main/proto']
         }
     }
 }

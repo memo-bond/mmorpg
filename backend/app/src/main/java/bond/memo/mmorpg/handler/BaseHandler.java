@@ -1,11 +1,11 @@
 package bond.memo.mmorpg.handler;
 
-import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.GeneratedMessageLite;
 
 public abstract class BaseHandler {
-    protected GeneratedMessage msg;
+    protected GeneratedMessageLite msg;
 
-    public BaseHandler(GeneratedMessage msg) {
+    public BaseHandler(GeneratedMessageLite msg) {
         this.msg = msg;
     }
 }

@@ -1,11 +1,11 @@
 package bond.memo.mmorpg.handler;
 
 import bond.memo.mmorpg.models.PlayerActions;
-import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.GeneratedMessageLite;
 
 public class MoveHandler extends BaseHandler implements Handler {
 
-    public MoveHandler(GeneratedMessage msg) {
+    public MoveHandler(GeneratedMessageLite msg) {
         super(msg);
     }
 
