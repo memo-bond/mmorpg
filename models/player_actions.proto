@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option java_package = "bond.memo.mmorpg.models";
+
+message PlayerMessage {
+  oneof action {
+    Join join = 1;
+    Move move = 2;
+  }
+}
+
+message Join {
+  int32 id = 1;
+  string name = 2;
+  float x = 3;
+  float y = 4;
+}
+
+message Move {
+  int32 id = 1;
+  float x = 2;
+  float y = 3;
+}
