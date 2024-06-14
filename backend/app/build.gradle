@@ -52,7 +52,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = 'bond.memo.mmorpg.client.ClientTest'
+    mainClass = 'bond.memo.mmorpg.GameServer'
 }
 
 tasks.named('test') {

@@ -1,6 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System.IO;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.U2D;
+using Google.Protobuf;
+using System.Collections;
+using NativeWebSocket;
 
 namespace RPGM.Gameplay
 {
@@ -12,8 +16,7 @@ namespace RPGM.Gameplay
         [SerializeField]
         private bool online = false;
 
-        private UnityClient client;
-        private WebSocketClient websocketClient;
+        private WebSocketClient client;
 
         public float speed = 1;
         public float acceleration = 2;
@@ -51,24 +54,35 @@ namespace RPGM.Gameplay
 
             if (online)
             {
+                client = new WebSocketClient("ws://localhost:6666/ws");
+                Debug.Log("Client state 1 " + client.State());
+
+                await Connect();
+                
+                Debug.Log("Client state 2 " + client.State());
+
                 PlayerMessage msg = new()
                 {
                     Join = new()
                     {
                         Id = 1,
-                        Name = "lucas",
+                        Name = "Lucas",
                         X = transform.position.x,
                         Y = transform.position.y
                     }
                 };
+                
+                client.Send(msg);
+            }
+        }
 
-                // client = new UnityClient("127.0.0.1", 6666);
-                // await client.ConnectAsync(msg);
+        private async Task Connect()
+        {
+            _ = client.Connect();
 
-                websocketClient = new();
-                await websocketClient.ConnectWebSocket();
-
-                await websocketClient.SendMessage(msg);
+            while (client.State() != WebSocketState.Open)
+            {
+                await Task.Delay(10);
             }
         }
 
@@ -108,8 +122,14 @@ namespace RPGM.Gameplay
                         }
                     };
 
-                    // _ = client.SendMessage(msg);
-                    _ = websocketClient.SendMessage(msg);
+                    byte[] bytes;
+                    using (var stream = new MemoryStream())
+                    {
+                        msg.WriteTo(stream);
+                        bytes = stream.ToArray();
+                    }
+                    client.Send(msg);
+
                     lastPosition = transform.position;
                 }
             }
@@ -126,6 +146,9 @@ namespace RPGM.Gameplay
 
         void Update()
         {
+#if !UNITY_WEBGL || UNITY_EDITOR
+            client.DispatchMessageQueue();
+#endif
             switch (state)
             {
                 case State.Idle:
@@ -150,6 +173,11 @@ namespace RPGM.Gameplay
             rigidbody2D = GetComponent<Rigidbody2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
             pixelPerfectCamera = GameObject.FindObjectOfType<PixelPerfectCamera>();
+        }
+
+        private async void OnApplicationQuit()
+        {
+            await client.Close();
         }
     }
 }

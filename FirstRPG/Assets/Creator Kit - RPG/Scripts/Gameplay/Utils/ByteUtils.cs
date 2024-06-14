@@ -3,7 +3,6 @@ using Google.Protobuf;
 
 public static class ByteUtils
 {
-
     public static byte[] massageMsg(IMessage message)
     {
         byte[] data = message.ToByteArray();

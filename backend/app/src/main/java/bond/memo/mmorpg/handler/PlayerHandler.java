@@ -12,10 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 public class PlayerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object message) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object message) {
         if (message instanceof WebSocketFrame) {
             switch (message) {
-                case BinaryWebSocketFrame data -> handleBinaryData(data);
+                case BinaryWebSocketFrame data -> handleBinaryData(ctx, data);
                 case TextWebSocketFrame textWebSocketFrame -> {
                     log.info("TextWebSocketFrame Received : ");
                     ctx.channel().writeAndFlush(
@@ -38,16 +38,16 @@ public class PlayerHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private static void handleBinaryData(BinaryWebSocketFrame data) {
+    private static void handleBinaryData(ChannelHandlerContext ctx, BinaryWebSocketFrame data) {
         try {
             PlayerActions.PlayerMessage msg = PlayerActions.PlayerMessage
                     .parseFrom(ByteBufUtil.getBytes(data.content()));
             switch (msg.getActionCase()) {
                 case JOIN:
-                    new JoinHandler(msg.getJoin()).handle();
+                    new JoinHandler(msg.getJoin()).handle(ctx);
                     break;
                 case MOVE:
-                    new MoveHandler(msg.getMove()).handle();
+                    new MoveHandler(msg.getMove()).handle(ctx);
                     break;
                 case ACTION_NOT_SET:
                     log.error("ACTION_NOT_SET");

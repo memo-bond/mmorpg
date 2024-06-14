@@ -1,5 +1,6 @@
 using System;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
@@ -8,11 +9,10 @@ using static ByteUtils;
 
 public class UnityClient
 {
-    private string serverIP;
-    private int serverPort;
+    private readonly string serverIP;
+    private readonly int serverPort;
     private TcpClient client;
     private NetworkStream stream;
-    private byte[] buffer = new byte[1024];
     private Thread clientThread;
 
     public UnityClient(string ip, int port)
@@ -30,17 +30,17 @@ public class UnityClient
 
             stream = client.GetStream();
 
-            clientThread = new Thread(() =>
+            clientThread = new(() =>
             {
-                Task.Run(async () =>
-                {
-                    await ReceiveData();
-                });
+                _ = Task.Run(async () =>
+                  {
+                      await ReceiveData();
+                  });
             });
             clientThread.IsBackground = true;
             clientThread.Start();
 
-            Debug.Log("Connected to server");
+            Debug.Log("Join to server");
             _ = SendMessage(join);
             return true;
         }
@@ -81,26 +81,39 @@ public class UnityClient
     {
         try
         {
-            while (true)
+            while (client.Connected)
             {
+                Debug.Log("Client connected : " + client.Connected);
+
+                Debug.Log("stream data available : " + stream.DataAvailable);
+
                 if (stream.DataAvailable)
                 {
+                    
                     // Read the message length prefix (assuming it's a fixed-size int)
                     byte[] lengthBytes = new byte[sizeof(int)];
-                    await stream.ReadAsync(lengthBytes, 0, lengthBytes.Length);
+                    int bytesRead = await stream.ReadAsync(lengthBytes, 0, lengthBytes.Length);
+                    if (bytesRead < lengthBytes.Length)
+                    {
+                        Debug.LogError("Failed to read message length prefix.");
+                        continue;
+                    }
+
                     int messageLength = BitConverter.ToInt32(lengthBytes, 0);
 
                     // Read the message body
                     byte[] messageBytes = new byte[messageLength];
-                    await stream.ReadAsync(messageBytes, 0, messageLength);
-
-                    // Deserialize the protobuf message
-                    PlayerMessage message = PlayerMessage.Parser.ParseFrom(messageBytes);
+                    bytesRead = await stream.ReadAsync(messageBytes, 0, messageLength);
+                    if (bytesRead < messageLength)
+                    {
+                        Debug.LogError("Failed to read the entire message.");
+                        continue;
+                    }
 
                     // Handle the received message
-                    Debug.Log("Received from server: " + message);
+                    Debug.Log("Received from server: " + Encoding.UTF8.GetString(messageBytes));
                 }
-                await Task.Delay(10); // Add a short delay to avoid tight loop
+                await Task.Delay(1000); // Add a short delay to avoid tight loop
             }
         }
         catch (Exception e)
