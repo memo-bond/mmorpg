@@ -638,3 +638,7 @@ gradle-app.setting
 *.hprof
 
 # End of https://www.toptal.com/developers/gitignore/api/gradle,intellij,java,unity,csharp
+.idea/misc.xml
+.idea/mmorpg.iml
+.idea/modules.xml
+.idea/vcs.xml
