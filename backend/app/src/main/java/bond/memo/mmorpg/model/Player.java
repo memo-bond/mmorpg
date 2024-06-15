@@ -7,6 +7,7 @@ import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.api.Randomizer;
 
+import java.awt.Color;
 import java.util.Random;
 
 import static org.jeasy.random.FieldPredicates.inClass;
@@ -21,7 +22,8 @@ public class Player {
     private Position position;
     private float direction;
     private float speed;
-    private final float radius;
+    private float radius;
+    private Color color;
     private static final Random RANDOM = new Random();
 
     private static EasyRandomParameters parameters = new EasyRandomParameters()
@@ -30,13 +32,15 @@ public class Player {
             .randomize(field -> field.getName().equals("x"), new FloatRangeRandomizer(0.0f, 900.0f))
             .randomize(field -> field.getName().equals("y"), new FloatRangeRandomizer(0.0f, 900.0f))
             .randomize(field -> field.getName().equals("direction"), new FloatRangeRandomizer(0.0f, 360.0f))
-            .excludeField(named("radius").and(ofType(Float.class)).and(inClass(Player.class)));
+            .excludeField(named("radius").and(ofType(Float.class)).and(inClass(Player.class)))
+            .excludeField(named("color").and(ofType(Color.class)).and(inClass(Player.class)));
     private static EasyRandom easyRandom = new EasyRandom(parameters);
     private static Faker faker = new Faker();;
 
     public static Player nextPlayer() {
         Player player = easyRandom.nextObject(Player.class);
         player.setName(faker.name().fullName());
+        player.setColor(ColorUtil.getRandomColor());
         return player;
     }
 
@@ -56,6 +60,17 @@ public class Player {
         }
     }
 
+    class ColorUtil {
+
+        private static final Random random = new Random();
+
+        public static Color getRandomColor() {
+            int red = random.nextInt(256);
+            int green = random.nextInt(256);
+            int blue = random.nextInt(256);
+            return new Color(red, green, blue);
+        }
+    }
 
     public Player(int id, String name, Position position, float speed, float radius) {
         this.id = id;
@@ -64,6 +79,7 @@ public class Player {
         this.speed = 100 + RANDOM.nextInt(200);
         this.direction = new Random().nextFloat() * 360; // Random initial direction
         this.radius = radius;
+        this.color = ColorUtil.getRandomColor();
     }
 
     public void move(float deltaTime) {

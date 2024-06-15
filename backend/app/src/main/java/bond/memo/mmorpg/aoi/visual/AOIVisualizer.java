@@ -20,7 +20,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
-public class GridVisualizer extends JPanel {
+public class AOIVisualizer extends JPanel {
 
     private static final float radius = 50;
     private final int gridSize;
@@ -30,7 +30,7 @@ public class GridVisualizer extends JPanel {
     private final AtomicInteger playerIdCounter = new AtomicInteger(3);
     private Timer timer;
 
-    public GridVisualizer(int gridSize, int cellSize, AOISystem aoiSystem) {
+    public AOIVisualizer(int gridSize, int cellSize, AOISystem aoiSystem) {
         this.gridSize = gridSize;
         this.cellSize = cellSize;
         this.aoiSystem = aoiSystem;
@@ -139,15 +139,17 @@ public class GridVisualizer extends JPanel {
     }
 
     private void drawPlayers(Graphics g) {
-        g.setColor(Color.RED);
+//        g.setColor(ColorUtil.getRandomColor());
         for (Map<Integer, GridCell> column : aoiSystem.getGrid().values()) {
             for (GridCell cell : column.values()) {
                 for (Player player : cell.getPlayers()) {
+                    g.setColor(player.getColor());
                     int x = (int) player.getPosition().getX();
                     int y = (int) player.getPosition().getY();
                     g.fillOval(x - 5, y - 5, 10, 10); // Draw player as a small circle
                     g.drawOval(x - (int) player.getRadius(), y - (int) player.getRadius(),
                             (int) player.getRadius() * 2, (int) player.getRadius() * 2); // Draw player's radius
+                    g.drawString(player.getName(), (int) (x - radius), (int) (y - radius));
                 }
             }
         }
@@ -188,8 +190,8 @@ public class GridVisualizer extends JPanel {
         aoiSystem.addPlayer(player1);
         aoiSystem.addPlayer(player2);
 
-        GridVisualizer gridVisualizer = new GridVisualizer(gridSize, cellSize, aoiSystem);
-        frame.add(gridVisualizer);
+        AOIVisualizer AOIVisualizer = new AOIVisualizer(gridSize, cellSize, aoiSystem);
+        frame.add(AOIVisualizer);
         frame.pack();
         frame.setVisible(true);
     }
