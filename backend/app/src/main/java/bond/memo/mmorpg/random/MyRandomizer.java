@@ -6,6 +6,7 @@ import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 
 import java.awt.Color;
+import java.util.Random;
 
 import static org.jeasy.random.FieldPredicates.inClass;
 import static org.jeasy.random.FieldPredicates.named;
@@ -16,6 +17,7 @@ public class MyRandomizer {
     private static final MyRandomizer MY_RANDOMIZER = new MyRandomizer();
     private final EasyRandom easyRandom;
     private final Faker faker;
+    private final Random random;
 
     public MyRandomizer() {
         EasyRandomParameters parameters = new EasyRandomParameters()
@@ -28,6 +30,7 @@ public class MyRandomizer {
                 .excludeField(named("color").and(ofType(Color.class)).and(inClass(Player.class)));
         easyRandom = new EasyRandom(parameters);
         this.faker = new Faker();
+        this.random = new Random();
     }
 
     public static <T> T nextObject(final Class<T> type) {
@@ -36,5 +39,9 @@ public class MyRandomizer {
 
     public static String fullName() {
         return MY_RANDOMIZER.faker.name().fullName();
+    }
+
+    public static Random random() {
+        return MY_RANDOMIZER.random;
     }
 }

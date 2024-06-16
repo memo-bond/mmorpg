@@ -29,9 +29,9 @@ public class GameServer {
     }
 
     public void start() throws InterruptedException {
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        try {
+
+        try (EventLoopGroup bossGroup = new NioEventLoopGroup();
+             EventLoopGroup workerGroup = new NioEventLoopGroup()) {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
@@ -40,13 +40,8 @@ public class GameServer {
                     .option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childOption(ChannelOption.ALLOCATOR, ByteBufAllocator.DEFAULT);
-            ;
-
             ChannelFuture f = b.bind(port).sync();
             f.channel().closeFuture().sync();
-        } finally {
-            workerGroup.shutdownGracefully();
-            bossGroup.shutdownGracefully();
         }
     }
 
@@ -65,7 +60,8 @@ public class GameServer {
         try {
             new GameServer(SERVER_PORT).start();
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            log.error(e.getMessage(), e);
+            Thread.currentThread().interrupt();
         }
     }
 }

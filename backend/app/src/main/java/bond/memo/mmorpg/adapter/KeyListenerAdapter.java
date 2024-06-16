@@ -5,6 +5,9 @@ import java.awt.event.KeyListener;
 
 public final class KeyListenerAdapter {
 
+    private KeyListenerAdapter() {
+    }
+
     public static KeyListener adapter(KeyAction action) {
         return new KeyListener() {
             @Override
@@ -14,12 +17,12 @@ public final class KeyListenerAdapter {
 
             @Override
             public void keyReleased(KeyEvent e) {
-                // No-op
+                throw new UnsupportedOperationException();
             }
 
             @Override
             public void keyTyped(KeyEvent e) {
-                // No-op
+                throw new UnsupportedOperationException();
             }
         };
     }

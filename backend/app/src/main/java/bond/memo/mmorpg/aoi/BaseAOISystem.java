@@ -6,5 +6,5 @@ public abstract class BaseAOISystem implements AOISystem {
         return (int) Math.floor(coordinate / getCellSize());
     }
 
-    abstract protected int getCellSize();
+    abstract int getCellSize();
 }

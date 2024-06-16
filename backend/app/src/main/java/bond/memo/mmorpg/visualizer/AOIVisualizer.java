@@ -1,24 +1,25 @@
 package bond.memo.mmorpg.visualizer;
 
 import bond.memo.mmorpg.adapter.KeyListenerAdapter;
+import bond.memo.mmorpg.adapter.MouseListenerAdapter;
 import bond.memo.mmorpg.aoi.AOISystem;
 import bond.memo.mmorpg.aoi.AOISystemImpl;
 import bond.memo.mmorpg.aoi.GridCell;
 import bond.memo.mmorpg.model.Player;
+import bond.memo.mmorpg.random.MyRandomizer;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import javax.swing.WindowConstants;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static bond.memo.mmorpg.constants.Constants.RADIUS;
@@ -28,9 +29,9 @@ public class AOIVisualizer extends JPanel {
 
     private final int gridSize;
     private final int cellSize;
-    private final AOISystem aoiSystem;
-    private final Player mainPlayer;
-    private final List<Player> players;
+    private final transient AOISystem aoiSystem;
+    private final transient Player mainPlayer;
+    private final transient List<Player> players;
 
     public static AOIVisualizer from(AOISystemImpl aoiSystem, Player mainPlayer) {
         return new AOIVisualizer(aoiSystem, mainPlayer);
@@ -44,12 +45,6 @@ public class AOIVisualizer extends JPanel {
         this.players = new CopyOnWriteArrayList<>();
 
         setPreferredSize(new Dimension(gridSize, gridSize));
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                handleMouseClick(e);
-            }
-        });
         Timer timer = new Timer(100, e -> {
             updatePlayerPositions();
             checkMainPlayerCollisions();
@@ -59,6 +54,7 @@ public class AOIVisualizer extends JPanel {
 
         // Key listener for main player movement
         addKeyListener(KeyListenerAdapter.adapter(this::controlMainPlayer));
+        addMouseListener(MouseListenerAdapter.adapter(this::handleMouseClick));
         setFocusable(true);
     }
 
@@ -91,6 +87,7 @@ public class AOIVisualizer extends JPanel {
                         mainPlayer.setPosition(new Player.Position(mainPlayer.getPosition().getX() - moveAmount, mainPlayer.getPosition().getY()));
                 case KeyEvent.VK_RIGHT, KeyEvent.VK_D ->
                         mainPlayer.setPosition(new Player.Position(mainPlayer.getPosition().getX() + moveAmount, mainPlayer.getPosition().getY()));
+                default -> log.info("Unknown key code {}", key);
             }
             mainPlayer.ensurePlayerWithinBounds(gridSize);
             repaint();
@@ -104,26 +101,8 @@ public class AOIVisualizer extends JPanel {
                     if (player == mainPlayer) {
                         continue;
                     }
-                    player.move(0.1f); // Move player with delta time (0.1 seconds for example)
-
-                    // Ensure the player stays within bounds
-                    if (player.getPosition().getX() < 0 || player.getPosition().getX() >= gridSize ||
-                            player.getPosition().getY() < 0 || player.getPosition().getY() >= gridSize) {
-                        player.setDirection(new Random().nextFloat() * 360); // Change direction randomly
-                    }
-
-                    // Update player's cell in the grid if necessary
-                    int newCellX = (int) Math.floor(player.getPosition().getX() / cellSize);
-                    int newCellY = (int) Math.floor(player.getPosition().getY() / cellSize);
-                    int oldCellX = aoiSystem.getCellIndex(player.getPosition().getX() - player.getSpeed() * 0.1f * (float) Math.cos(Math.toRadians(player.getDirection())));
-                    int oldCellY = aoiSystem.getCellIndex(player.getPosition().getY() - player.getSpeed() * 0.1f * (float) Math.sin(Math.toRadians(player.getDirection())));
-
-                    if (newCellX != oldCellX || newCellY != oldCellY) {
-                        cell.getPlayers().remove(player);
-                        aoiSystem.addPlayer(player);
-                    }
-
-                    // Handle collision detection with other players
+                    movePlayer(player);
+                    updatePlayerCell(player, cell);
                     handlePlayerCollisions(player);
                 }
             }
@@ -131,13 +110,32 @@ public class AOIVisualizer extends JPanel {
         repaint(); // Redraw the grid with updated player positions
     }
 
+    private void movePlayer(Player player) {
+        player.move(0.1f);
+
+        if (player.isPlayerOutOfBounds(gridSize))
+            player.setDirection(MyRandomizer.random().nextFloat() * 360);
+    }
+
+    private void updatePlayerCell(Player player, GridCell cell) {
+        int newCellX = (int) Math.floor(player.getPosition().getX() / cellSize);
+        int newCellY = (int) Math.floor(player.getPosition().getY() / cellSize);
+        int oldCellX = aoiSystem.getCellIndex(player.getPosition().getX() - player.getSpeed() * 0.1f * (float) Math.cos(Math.toRadians(player.getDirection())));
+        int oldCellY = aoiSystem.getCellIndex(player.getPosition().getY() - player.getSpeed() * 0.1f * (float) Math.sin(Math.toRadians(player.getDirection())));
+
+        if (newCellX != oldCellX || newCellY != oldCellY) {
+            cell.getPlayers().remove(player);
+            aoiSystem.addPlayer(player);
+        }
+    }
+
+
     private void handlePlayerCollisions(Player player) {
         for (Map<Integer, GridCell> column : aoiSystem.getGrid().values()) {
             for (GridCell cell : column.values()) {
                 for (Player otherPlayer : cell.getPlayers()) {
                     if (player != otherPlayer && player.isCollision(otherPlayer)) {
                         // Perform action when collision occurs
-//                        log.info("Collision detected between Player {} , and Player {}", player.getName(), otherPlayer.getName());
                         // Example action: Change player direction
                         player.setDirection(player.getDirection() + 180); // Reverse direction
 //                        otherPlayer.setDirection(otherPlayer.getDirection() + 180); // Reverse direction
@@ -195,7 +193,7 @@ public class AOIVisualizer extends JPanel {
 
     public void startGui() {
         JFrame frame = new JFrame("Grid Visualizer");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         // Add example players
         Player player1 = Player.nextPlayer();

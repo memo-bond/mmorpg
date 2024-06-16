@@ -57,9 +57,20 @@ public class Player {
     }
 
     public void ensurePlayerWithinBounds(int gridSize) {
-        float newX = Math.max(0, Math.min(position.getX(), gridSize));
-        float newY = Math.max(0, Math.min(position.getY(), gridSize));
+        float newX = Math.clamp(position.x, 0, gridSize);
+        float newY = Math.clamp(position.y, 0, gridSize);
         this.setPosition(Player.Position.of(newX, newY));
+    }
+
+    public boolean isPlayerOutOfBounds(int gridSize) {
+        return position.x < 0 || position.x >= gridSize ||
+                position.y < 0 || position.y >= gridSize;
+    }
+
+    public double distance(Player.Position p2) {
+        float dx = position.x - p2.getX();
+        float dy = position.y - p2.getY();
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     @Data
