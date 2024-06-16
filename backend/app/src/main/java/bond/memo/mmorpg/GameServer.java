@@ -3,6 +3,9 @@
  */
 package bond.memo.mmorpg;
 
+import bond.memo.mmorpg.aoi.AOISystemImpl;
+import bond.memo.mmorpg.model.Player;
+import bond.memo.mmorpg.visualizer.AOIVisualizer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelFuture;
@@ -12,6 +15,11 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 
+import java.awt.Color;
+
+import static bond.memo.mmorpg.constants.Constants.RADIUS;
+import static bond.memo.mmorpg.constants.Constants.SERVER_PORT;
+
 @Slf4j
 public class GameServer {
     private final int port;
@@ -20,7 +28,7 @@ public class GameServer {
         this.port = port;
     }
 
-    public void start() throws Exception {
+    public void start() throws InterruptedException {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -31,7 +39,8 @@ public class GameServer {
                     .option(ChannelOption.ALLOCATOR, ByteBufAllocator.DEFAULT)
                     .option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
-                    .childOption(ChannelOption.ALLOCATOR, ByteBufAllocator.DEFAULT);;
+                    .childOption(ChannelOption.ALLOCATOR, ByteBufAllocator.DEFAULT);
+            ;
 
             ChannelFuture f = b.bind(port).sync();
             f.channel().closeFuture().sync();
@@ -41,9 +50,22 @@ public class GameServer {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        int port = 6666;
-        log.info("Server started on port {}", port);
-        new GameServer(port).start();
+    public static void main(String[] args) {
+        AOISystemImpl aoiSystem = new AOISystemImpl(1000, 100);
+
+        Player mainPlayer = Player.builder()
+                .id(300).name("Lucas").position(Player.Position.of(200, 300))
+                .speed(200).radius(RADIUS).direction(200)
+                .color(Color.RED)
+                .build();
+        aoiSystem.addPlayer(mainPlayer);
+        AOIVisualizer.from(aoiSystem, mainPlayer).startGui();
+
+        log.info("Server started on port {}", SERVER_PORT);
+        try {
+            new GameServer(SERVER_PORT).start();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

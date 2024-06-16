@@ -11,7 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class AOISystemImpl implements AOISystem {
 
+    @Getter
     private final int gridSize;
+    @Getter
     private final int cellSize;
     @Getter
     private final Map<Integer, Map<Integer, GridCell>> grid = new ConcurrentHashMap<>();

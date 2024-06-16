@@ -1,22 +1,19 @@
 package bond.memo.mmorpg.model;
 
-import com.github.javafaker.Faker;
+import bond.memo.mmorpg.random.MyRandomizer;
+import bond.memo.mmorpg.utils.ColorUtil;
+import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.jeasy.random.EasyRandom;
-import org.jeasy.random.EasyRandomParameters;
-import org.jeasy.random.api.Randomizer;
 
 import java.awt.Color;
 import java.util.Random;
 
-import static org.jeasy.random.FieldPredicates.inClass;
-import static org.jeasy.random.FieldPredicates.named;
-import static org.jeasy.random.FieldPredicates.ofType;
-
 @Slf4j
 @Data
+@Builder
 public class Player {
+
     private int id;
     private String name;
     private Position position;
@@ -26,60 +23,24 @@ public class Player {
     private Color color;
     private static final Random RANDOM = new Random();
 
-    private static EasyRandomParameters parameters = new EasyRandomParameters()
-            .randomize(field -> field.getName().equals("speed"), new FloatRangeRandomizer(50.0f, 100.0f))
-            .randomize(field -> field.getName().equals("radius"), new FloatRangeRandomizer(40.0f, 60.0f))
-            .randomize(field -> field.getName().equals("x"), new FloatRangeRandomizer(0.0f, 900.0f))
-            .randomize(field -> field.getName().equals("y"), new FloatRangeRandomizer(0.0f, 900.0f))
-            .randomize(field -> field.getName().equals("direction"), new FloatRangeRandomizer(0.0f, 360.0f))
-            .excludeField(named("radius").and(ofType(Float.class)).and(inClass(Player.class)))
-            .excludeField(named("color").and(ofType(Color.class)).and(inClass(Player.class)));
-    private static EasyRandom easyRandom = new EasyRandom(parameters);
-    private static Faker faker = new Faker();;
-
     public static Player nextPlayer() {
-        Player player = easyRandom.nextObject(Player.class);
-        player.setName(faker.name().fullName());
+        Player player = MyRandomizer.nextObject(Player.class);
+        player.setName(MyRandomizer.fullName());
         player.setColor(ColorUtil.getRandomColor());
         return player;
     }
 
-    static class FloatRangeRandomizer implements Randomizer<Float> {
-
-        private final float min;
-        private final float max;
-
-        public FloatRangeRandomizer(float min, float max) {
-            this.min = min;
-            this.max = max;
-        }
-
-        @Override
-        public Float getRandomValue() {
-            return min + (float) Math.random() * (max - min);
-        }
+    public Player() {
     }
 
-    class ColorUtil {
-
-        private static final Random random = new Random();
-
-        public static Color getRandomColor() {
-            int red = random.nextInt(256);
-            int green = random.nextInt(256);
-            int blue = random.nextInt(256);
-            return new Color(red, green, blue);
-        }
-    }
-
-    public Player(int id, String name, Position position, float speed, float radius) {
+    public Player(int id, String name, Position position, float direction, float speed, float radius, Color color) {
         this.id = id;
         this.name = name;
         this.position = position;
-        this.speed = 100 + RANDOM.nextInt(200);
-        this.direction = new Random().nextFloat() * 360; // Random initial direction
+        this.direction = direction;
+        this.speed = speed;
         this.radius = radius;
-        this.color = ColorUtil.getRandomColor();
+        this.color = color == null ? ColorUtil.getRandomColor() : color;
     }
 
     public void move(float deltaTime) {
@@ -92,6 +53,10 @@ public class Player {
     public static class Position {
         private float x;
         private float y;
+
+        public static Position of(float x, float y) {
+            return new Position(x, y);
+        }
 
         public Position(float x, float y) {
             this.x = x;
