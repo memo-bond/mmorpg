@@ -1,4 +1,4 @@
-package bond.memo.mmorpg.adapter;
+package bond.memo.mmorpg.config.adapter;
 
 import java.awt.event.MouseEvent;
 

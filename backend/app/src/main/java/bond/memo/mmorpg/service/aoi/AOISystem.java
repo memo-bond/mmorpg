@@ -1,4 +1,4 @@
-package bond.memo.mmorpg.aoi;
+package bond.memo.mmorpg.service.aoi;
 
 import bond.memo.mmorpg.model.Player;
 

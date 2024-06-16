@@ -3,25 +3,33 @@
  */
 package bond.memo.mmorpg;
 
-import bond.memo.mmorpg.aoi.AOISystemImpl;
-import bond.memo.mmorpg.model.Player;
+import bond.memo.mmorpg.handler.HttpServerHandler;
+import bond.memo.mmorpg.module.AutoServiceModule;
+import bond.memo.mmorpg.module.GameModule;
 import bond.memo.mmorpg.visualizer.AOIVisualizer;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.handler.stream.ChunkedWriteHandler;
 import lombok.extern.slf4j.Slf4j;
 
-import java.awt.Color;
-
-import static bond.memo.mmorpg.constants.Constants.RADIUS;
 import static bond.memo.mmorpg.constants.Constants.SERVER_PORT;
 
 @Slf4j
 public class GameServer {
+
     private final int port;
 
     public GameServer(int port) {
@@ -35,7 +43,7 @@ public class GameServer {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
-                    .childHandler(new ServerInitializer())
+                    .childHandler(serverInitializer())
                     .option(ChannelOption.ALLOCATOR, ByteBufAllocator.DEFAULT)
                     .option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
@@ -45,23 +53,32 @@ public class GameServer {
         }
     }
 
+    private static ChannelInitializer<SocketChannel> serverInitializer() {
+
+        return new ChannelInitializer<>() {
+            @Override
+            protected void initChannel(SocketChannel ch) {
+                ChannelPipeline pipeline = ch.pipeline();
+
+                // Setup Websocket
+                pipeline.addLast(new HttpServerCodec());
+                pipeline.addLast(new HttpServerHandler());
+                pipeline.addLast(new HttpObjectAggregator(65536));
+                pipeline.addLast(new ChunkedWriteHandler());
+                pipeline.addLast(new WebSocketServerProtocolHandler("/ws"));
+            }
+        };
+    }
+
     public static void main(String[] args) {
-        AOISystemImpl aoiSystem = new AOISystemImpl(1000, 100);
-
-        Player mainPlayer = Player.builder()
-                .id(300).name("Lucas").position(Player.Position.of(200, 300))
-                .speed(200).radius(RADIUS).direction(200)
-                .color(Color.RED)
-                .build();
-        aoiSystem.addPlayer(mainPlayer);
-        AOIVisualizer.from(aoiSystem, mainPlayer).startGui();
-
-        log.info("Server started on port {}", SERVER_PORT);
         try {
-            new GameServer(SERVER_PORT).start();
+            log.info("Server started on port {}", SERVER_PORT);
+            Injector injector = Guice.createInjector(AutoServiceModule.of(), GameModule.of());
+            injector.getInstance(AOIVisualizer.class).startGui();
+            injector.getInstance(GameServer.class).start();
         } catch (InterruptedException e) {
-            log.error(e.getMessage(), e);
             Thread.currentThread().interrupt();
+            log.error(e.getMessage(), e);
         }
     }
 }

@@ -1,8 +1,11 @@
-package bond.memo.mmorpg.adapter;
+package bond.memo.mmorpg.config.adapter;
+
+import lombok.extern.slf4j.Slf4j;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+@Slf4j
 public final class KeyListenerAdapter {
 
     private KeyListenerAdapter() {
@@ -17,12 +20,10 @@ public final class KeyListenerAdapter {
 
             @Override
             public void keyReleased(KeyEvent e) {
-                throw new UnsupportedOperationException();
             }
 
             @Override
             public void keyTyped(KeyEvent e) {
-                throw new UnsupportedOperationException();
             }
         };
     }

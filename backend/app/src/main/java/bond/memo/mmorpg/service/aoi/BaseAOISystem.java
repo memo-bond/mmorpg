@@ -1,4 +1,4 @@
-package bond.memo.mmorpg.aoi;
+package bond.memo.mmorpg.service.aoi;
 
 public abstract class BaseAOISystem implements AOISystem {
 

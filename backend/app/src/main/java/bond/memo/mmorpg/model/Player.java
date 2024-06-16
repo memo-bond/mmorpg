@@ -23,13 +23,6 @@ public class Player {
     private Color color;
     private static final Random RANDOM = new Random();
 
-    public static Player nextPlayer() {
-        Player player = MyRandomizer.nextObject(Player.class);
-        player.setName(MyRandomizer.fullName());
-        player.setColor(ColorUtil.getRandomColor());
-        return player;
-    }
-
     public Player() {
     }
 

@@ -1,12 +1,13 @@
 package bond.memo.mmorpg.visualizer;
 
-import bond.memo.mmorpg.adapter.KeyListenerAdapter;
-import bond.memo.mmorpg.adapter.MouseListenerAdapter;
-import bond.memo.mmorpg.aoi.AOISystem;
-import bond.memo.mmorpg.aoi.AOISystemImpl;
-import bond.memo.mmorpg.aoi.GridCell;
+import bond.memo.mmorpg.config.adapter.KeyListenerAdapter;
+import bond.memo.mmorpg.config.adapter.MouseListenerAdapter;
+import bond.memo.mmorpg.service.aoi.AOISystem;
+import bond.memo.mmorpg.service.aoi.AOISystemImpl;
+import bond.memo.mmorpg.service.aoi.GridCell;
 import bond.memo.mmorpg.model.Player;
 import bond.memo.mmorpg.random.MyRandomizer;
+import bond.memo.mmorpg.service.PlayerService;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.JFrame;
@@ -37,7 +38,7 @@ public class AOIVisualizer extends JPanel {
         return new AOIVisualizer(aoiSystem, mainPlayer);
     }
 
-    public AOIVisualizer(AOISystemImpl aoiSystem, Player mainPlayer) {
+    private AOIVisualizer(AOISystemImpl aoiSystem, Player mainPlayer) {
         this.gridSize = aoiSystem.getGridSize();
         this.cellSize = aoiSystem.getCellSize();
         this.aoiSystem = aoiSystem;
@@ -147,7 +148,7 @@ public class AOIVisualizer extends JPanel {
     }
 
     private void handleMouseClick(MouseEvent e) {
-        Player player = Player.nextPlayer();
+        Player player = PlayerService.nextPlayer();
         player.getPosition().setX(e.getX());
         player.getPosition().setY(e.getY());
         aoiSystem.addPlayer(player);
@@ -192,14 +193,14 @@ public class AOIVisualizer extends JPanel {
     }
 
     public void startGui() {
-        JFrame frame = new JFrame("Grid Visualizer");
+        JFrame frame = new JFrame("AOI Visualizer");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         // Add example players
-        Player player1 = Player.nextPlayer();
-        Player player2 = Player.nextPlayer();
-        aoiSystem.addPlayer(player1);
-        aoiSystem.addPlayer(player2);
+        Player p1 = PlayerService.nextPlayer();
+        Player p2 = PlayerService.nextPlayer();
+        aoiSystem.addPlayer(p1);
+        aoiSystem.addPlayer(p2);
 
         frame.add(this);
         frame.pack();

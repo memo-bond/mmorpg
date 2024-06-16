@@ -1,12 +1,14 @@
-package bond.memo.mmorpg.adapter;
+package bond.memo.mmorpg.config.adapter;
+
+import lombok.extern.slf4j.Slf4j;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+@Slf4j
 public final class MouseListenerAdapter {
 
     private MouseListenerAdapter() {
-
     }
 
     public static MouseListener adapter(MouseAction action) {
@@ -18,22 +20,18 @@ public final class MouseListenerAdapter {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                throw new UnsupportedOperationException();
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                throw new UnsupportedOperationException();
             }
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                throw new UnsupportedOperationException();
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                throw new UnsupportedOperationException();
             }
         };
     }
