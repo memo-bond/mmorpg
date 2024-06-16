@@ -12,4 +12,6 @@ public interface AOISystem {
     List<Player> getPlayersInAOI(Player.Position position, float radius);
 
     Map<Integer, Map<Integer, GridCell>> getGrid();
+
+    int getCellIndex(float v);
 }

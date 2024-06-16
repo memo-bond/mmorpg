@@ -20,24 +20,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
+
+import static bond.memo.mmorpg.constants.Constants.RADIUS;
 
 @Slf4j
 public class AOIVisualizer extends JPanel {
 
-    private static final float radius = 50;
     private final int gridSize;
     private final int cellSize;
     private final AOISystem aoiSystem;
     private final Player mainPlayer;
     private final List<Player> players;
 
-    private final AtomicInteger playerIdCounter = new AtomicInteger(3);
-    private Player.Position selectedPosition;
-
     public static AOIVisualizer from(AOISystemImpl aoiSystem, Player mainPlayer) {
         return new AOIVisualizer(aoiSystem, mainPlayer);
     }
+
     public AOIVisualizer(AOISystemImpl aoiSystem, Player mainPlayer) {
         this.gridSize = aoiSystem.getGridSize();
         this.cellSize = aoiSystem.getCellSize();
@@ -54,7 +52,7 @@ public class AOIVisualizer extends JPanel {
         });
         Timer timer = new Timer(100, e -> {
             updatePlayerPositions();
-            checkCollisions();
+            checkMainPlayerCollisions();
             repaint();
         });
         timer.start();
@@ -64,7 +62,7 @@ public class AOIVisualizer extends JPanel {
         setFocusable(true);
     }
 
-    private void checkCollisions() {
+    private void checkMainPlayerCollisions() {
         if (mainPlayer != null) {
             for (Player player : players) {
                 if (player != mainPlayer) {
@@ -72,7 +70,7 @@ public class AOIVisualizer extends JPanel {
                             Math.pow(player.getPosition().getX() - mainPlayer.getPosition().getX(), 2) +
                                     Math.pow(player.getPosition().getY() - mainPlayer.getPosition().getY(), 2)
                     );
-                    if (distance < radius)
+                    if (distance < RADIUS)
                         log.info("Collision detected between main player {} vs player {}", mainPlayer.getName(), player.getName());
                 }
             }
@@ -94,15 +92,9 @@ public class AOIVisualizer extends JPanel {
                 case KeyEvent.VK_RIGHT, KeyEvent.VK_D ->
                         mainPlayer.setPosition(new Player.Position(mainPlayer.getPosition().getX() + moveAmount, mainPlayer.getPosition().getY()));
             }
-            ensurePlayerWithinBounds(mainPlayer);
+            mainPlayer.ensurePlayerWithinBounds(gridSize);
             repaint();
         }
-    }
-
-    private void ensurePlayerWithinBounds(Player player) {
-        float newX = Math.max(0, Math.min(player.getPosition().getX(), gridSize));
-        float newY = Math.max(0, Math.min(player.getPosition().getY(), gridSize));
-        player.setPosition(new Player.Position(newX, newY));
     }
 
     private void updatePlayerPositions() {
@@ -123,8 +115,8 @@ public class AOIVisualizer extends JPanel {
                     // Update player's cell in the grid if necessary
                     int newCellX = (int) Math.floor(player.getPosition().getX() / cellSize);
                     int newCellY = (int) Math.floor(player.getPosition().getY() / cellSize);
-                    int oldCellX = getCellIndex(player.getPosition().getX() - player.getSpeed() * 0.1f * (float) Math.cos(Math.toRadians(player.getDirection())));
-                    int oldCellY = getCellIndex(player.getPosition().getY() - player.getSpeed() * 0.1f * (float) Math.sin(Math.toRadians(player.getDirection())));
+                    int oldCellX = aoiSystem.getCellIndex(player.getPosition().getX() - player.getSpeed() * 0.1f * (float) Math.cos(Math.toRadians(player.getDirection())));
+                    int oldCellY = aoiSystem.getCellIndex(player.getPosition().getY() - player.getSpeed() * 0.1f * (float) Math.sin(Math.toRadians(player.getDirection())));
 
                     if (newCellX != oldCellX || newCellY != oldCellY) {
                         cell.getPlayers().remove(player);
@@ -143,7 +135,7 @@ public class AOIVisualizer extends JPanel {
         for (Map<Integer, GridCell> column : aoiSystem.getGrid().values()) {
             for (GridCell cell : column.values()) {
                 for (Player otherPlayer : cell.getPlayers()) {
-                    if (player != otherPlayer && isCollision(player, otherPlayer)) {
+                    if (player != otherPlayer && player.isCollision(otherPlayer)) {
                         // Perform action when collision occurs
 //                        log.info("Collision detected between Player {} , and Player {}", player.getName(), otherPlayer.getName());
                         // Example action: Change player direction
@@ -156,24 +148,12 @@ public class AOIVisualizer extends JPanel {
         }
     }
 
-    private boolean isCollision(Player player1, Player player2) {
-        float dx = player1.getPosition().getX() - player2.getPosition().getX();
-        float dy = player1.getPosition().getY() - player2.getPosition().getY();
-        float distance = (float) Math.sqrt(dx * dx + dy * dy);
-        return distance <= player1.getRadius() + player2.getRadius();
-    }
-
-    private int getCellIndex(float coordinate) {
-        return (int) Math.floor(coordinate / cellSize);
-    }
-
     private void handleMouseClick(MouseEvent e) {
         Player player = Player.nextPlayer();
         player.getPosition().setX(e.getX());
         player.getPosition().setY(e.getY());
         aoiSystem.addPlayer(player);
         players.add(player);
-        selectedPosition = new Player.Position(player.getPosition().getX(), player.getPosition().getY());
         repaint(); // Redraw the grid with the new player and AOI
     }
 
@@ -182,24 +162,6 @@ public class AOIVisualizer extends JPanel {
         super.paintComponent(g);
         drawGrid(g);
         drawPlayers(g);
-        if (selectedPosition != null) {
-            drawAOI(g, selectedPosition);
-        }
-    }
-
-    private void drawAOI(Graphics g, Player.Position position) {
-        g.setColor(Color.BLUE);
-        List<Player> playersInAOI = aoiSystem.getPlayersInAOI(position, radius);
-        for (Player player : playersInAOI) {
-            int x = (int) player.getPosition().getX();
-            int y = (int) player.getPosition().getY();
-            g.fillOval(x - 5, y - 5, 10, 10); // Highlight player in AOI as a blue circle
-        }
-
-        int x = (int) position.getX();
-        int y = (int) position.getY();
-        int r = (int) radius;
-        g.drawOval(x - r, y - r, 2 * r, 2 * r);
     }
 
     private void drawPlayers(Graphics g) {
@@ -212,7 +174,7 @@ public class AOIVisualizer extends JPanel {
                     g.fillOval(x - 5, y - 5, 10, 10); // Draw player as a small circle
                     g.drawOval(x - (int) player.getRadius(), y - (int) player.getRadius(),
                             (int) player.getRadius() * 2, (int) player.getRadius() * 2); // Draw player's radius
-                    g.drawString(player.getName(), (int) (x - radius), (int) (y - radius));
+                    g.drawString(player.getName(), (int) (x - RADIUS), (int) (y - RADIUS));
                 }
             }
         }

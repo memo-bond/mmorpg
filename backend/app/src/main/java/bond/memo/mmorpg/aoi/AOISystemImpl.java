@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class AOISystemImpl implements AOISystem {
+public class AOISystemImpl extends BaseAOISystem {
 
     @Getter
     private final int gridSize;
@@ -21,10 +21,6 @@ public class AOISystemImpl implements AOISystem {
     public AOISystemImpl(int gridSize, int cellSize) {
         this.gridSize = gridSize;
         this.cellSize = cellSize;
-    }
-
-    private int getCellIndex(float coordinate) {
-        return (int) Math.floor(coordinate / cellSize);
     }
 
     public void addPlayer(Player player) {

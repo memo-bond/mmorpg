@@ -49,6 +49,19 @@ public class Player {
         position.setY(position.getY() + speed * (float) Math.sin(radians) * deltaTime);
     }
 
+    public boolean isCollision(Player player2) {
+        float dx = position.getX() - player2.getPosition().getX();
+        float dy = position.getY() - player2.getPosition().getY();
+        float distance = (float) Math.sqrt(dx * dx + dy * dy);
+        return distance <= radius + player2.getRadius();
+    }
+
+    public void ensurePlayerWithinBounds(int gridSize) {
+        float newX = Math.max(0, Math.min(position.getX(), gridSize));
+        float newY = Math.max(0, Math.min(position.getY(), gridSize));
+        this.setPosition(Player.Position.of(newX, newY));
+    }
+
     @Data
     public static class Position {
         private float x;
