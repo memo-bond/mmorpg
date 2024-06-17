@@ -2,7 +2,7 @@ package bond.memo.mmorpg.visualizer;
 
 import bond.memo.mmorpg.config.adapter.KeyListenerAdapter;
 import bond.memo.mmorpg.config.adapter.MouseListenerAdapter;
-import bond.memo.mmorpg.service.aoi.AOISystem;
+import bond.memo.mmorpg.service.AOISystem;
 import bond.memo.mmorpg.service.aoi.AOISystemImpl;
 import bond.memo.mmorpg.service.aoi.GridCell;
 import bond.memo.mmorpg.model.Player;
@@ -81,13 +81,13 @@ public class AOIVisualizer extends JPanel {
 
             switch (key) {
                 case KeyEvent.VK_UP, KeyEvent.VK_W ->
-                        mainPlayer.setPosition(new Player.Position(mainPlayer.getPosition().getX(), mainPlayer.getPosition().getY() - moveAmount));
+                        mainPlayer.setPosition(Player.Position.of(mainPlayer.getPosition().getX(), mainPlayer.getPosition().getY() - moveAmount));
                 case KeyEvent.VK_DOWN, KeyEvent.VK_S ->
-                        mainPlayer.setPosition(new Player.Position(mainPlayer.getPosition().getX(), mainPlayer.getPosition().getY() + moveAmount));
+                        mainPlayer.setPosition(Player.Position.of(mainPlayer.getPosition().getX(), mainPlayer.getPosition().getY() + moveAmount));
                 case KeyEvent.VK_LEFT, KeyEvent.VK_A ->
-                        mainPlayer.setPosition(new Player.Position(mainPlayer.getPosition().getX() - moveAmount, mainPlayer.getPosition().getY()));
+                        mainPlayer.setPosition(Player.Position.of(mainPlayer.getPosition().getX() - moveAmount, mainPlayer.getPosition().getY()));
                 case KeyEvent.VK_RIGHT, KeyEvent.VK_D ->
-                        mainPlayer.setPosition(new Player.Position(mainPlayer.getPosition().getX() + moveAmount, mainPlayer.getPosition().getY()));
+                        mainPlayer.setPosition(Player.Position.of(mainPlayer.getPosition().getX() + moveAmount, mainPlayer.getPosition().getY()));
                 default -> log.info("Unknown key code {}", key);
             }
             mainPlayer.ensurePlayerWithinBounds(gridSize);
@@ -99,7 +99,7 @@ public class AOIVisualizer extends JPanel {
         for (Map<Integer, GridCell> column : aoiSystem.getGrid().values()) {
             for (GridCell cell : column.values()) {
                 for (Player player : cell.getPlayers()) {
-                    if (player == mainPlayer) {
+                    if (player == mainPlayer || player.isMain()) {
                         continue;
                     }
                     movePlayer(player);
@@ -112,7 +112,7 @@ public class AOIVisualizer extends JPanel {
     }
 
     private void movePlayer(Player player) {
-        player.move(0.1f);
+        player.moveGui(0.1f);
 
         if (player.isPlayerOutOfBounds(gridSize))
             player.setDirection(MyRandomizer.random().nextFloat() * 360);

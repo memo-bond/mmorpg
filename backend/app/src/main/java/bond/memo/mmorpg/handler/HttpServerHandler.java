@@ -1,5 +1,7 @@
 package bond.memo.mmorpg.handler;
 
+import bond.memo.mmorpg.service.AOISystem;
+import bond.memo.mmorpg.service.aoi.AOISystemImpl;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -12,6 +14,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 
+    private final AOISystem aoiSystem;
+
+    public static HttpServerHandler of(AOISystem aoiSystem) {
+        return new HttpServerHandler(aoiSystem);
+    }
+
+    public HttpServerHandler(AOISystem aoiSystem) {
+        this.aoiSystem = aoiSystem;
+    }
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
 
@@ -22,7 +34,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                     "WebSocket".equalsIgnoreCase(headers.get(HttpHeaderNames.UPGRADE))) {
 
                 //Adding new handler to the existing pipeline to handle WebSocket Messages
-                ctx.pipeline().replace(this, "websocketHandler", new PlayerHandler());
+                ctx.pipeline().replace(this, "websocketHandler", PlayerHandler.of(aoiSystem));
 
                 log.info("Handshaking....");
                 //Do the Handshake to upgrade connection from HTTP to WebSocket protocol

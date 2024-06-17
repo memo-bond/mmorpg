@@ -34,7 +34,7 @@ public class AOISystemRedisImpl extends BaseAOISystem {
     public void updatePlayerPosition(Player player, float newX, float newY) {
         String playerId = String.valueOf(player.getId());
         jedis.eval(UPDATE_PLAYER_POSITION_SCRIPT, 0, playerId, String.valueOf(newX), String.valueOf(newY), String.valueOf(cellSize));
-        player.setPosition(new Player.Position(newX, newY));
+        player.setPosition(Player.Position.of(newX, newY));
     }
 
     public void close() {
@@ -45,6 +45,16 @@ public class AOISystemRedisImpl extends BaseAOISystem {
 
     public void addPlayer(Player player) {
         updatePlayerPosition(player, player.getPosition().getX(), player.getPosition().getY());
+    }
+
+    @Override
+    public Player getPlayerById(int playerId) {
+        return null;
+    }
+
+    @Override
+    public void removePlayer(int id) {
+
     }
 
     @Override

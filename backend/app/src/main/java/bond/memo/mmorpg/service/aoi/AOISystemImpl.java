@@ -17,6 +17,7 @@ public class AOISystemImpl extends BaseAOISystem {
     private final int cellSize;
     @Getter
     private final Map<Integer, Map<Integer, GridCell>> grid = new ConcurrentHashMap<>();
+    private final Map<Integer, Player> playerMap = new ConcurrentHashMap<>();
 
     public AOISystemImpl(int gridSize, int cellSize) {
         this.gridSize = gridSize;
@@ -29,6 +30,33 @@ public class AOISystemImpl extends BaseAOISystem {
         grid.computeIfAbsent(cellX, k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(cellY, k -> new GridCell())
                 .getPlayers().add(player);
+        playerMap.put(player.getId(), player);
+    }
+
+    @Override
+    public Player getPlayerById(int playerId) {
+        return playerMap.get(playerId);
+    }
+
+    @Override
+    public void removePlayer(int id) {
+        Player player = getPlayerById(id);
+        int cellX = getCellIndex(player.getPosition().getX());
+        int cellY = getCellIndex(player.getPosition().getY());
+        Map<Integer, GridCell> column = grid.get(cellX);
+        if (column != null) {
+            GridCell cell = column.get(cellY);
+            if (cell != null) {
+                cell.getPlayers().remove(player);
+                if (cell.getPlayers().isEmpty()) {
+                    column.remove(cellY);
+                }
+            }
+            if (column.isEmpty()) {
+                grid.remove(cellX);
+            }
+        }
+        playerMap.remove(player.getId()); // Remove player from the ID map
     }
 
     public List<Player> getPlayersInAOI(Player.Position position, float radius) {

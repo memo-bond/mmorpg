@@ -1,6 +1,5 @@
 package bond.memo.mmorpg.model;
 
-import bond.memo.mmorpg.random.MyRandomizer;
 import bond.memo.mmorpg.utils.ColorUtil;
 import lombok.Builder;
 import lombok.Data;
@@ -21,12 +20,13 @@ public class Player {
     private float speed;
     private float radius;
     private Color color;
+    private boolean main;
     private static final Random RANDOM = new Random();
 
     public Player() {
     }
 
-    public Player(int id, String name, Position position, float direction, float speed, float radius, Color color) {
+    public Player(int id, String name, Position position, float direction, float speed, float radius, Color color, boolean main) {
         this.id = id;
         this.name = name;
         this.position = position;
@@ -34,12 +34,18 @@ public class Player {
         this.speed = speed;
         this.radius = radius;
         this.color = color == null ? ColorUtil.getRandomColor() : color;
+        this.main = main;
     }
 
-    public void move(float deltaTime) {
+    public void moveGui(float deltaTime) {
         float radians = (float) Math.toRadians(direction);
         position.setX(position.getX() + speed * (float) Math.cos(radians) * deltaTime);
         position.setY(position.getY() + speed * (float) Math.sin(radians) * deltaTime);
+    }
+
+    public void move(float x, float y) {
+        position.x = x;
+        position.y = y;
     }
 
     public boolean isCollision(Player player2) {
@@ -75,7 +81,7 @@ public class Player {
             return new Position(x, y);
         }
 
-        public Position(float x, float y) {
+        private Position(float x, float y) {
             this.x = x;
             this.y = y;
         }

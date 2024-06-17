@@ -1,16 +1,20 @@
 package bond.memo.mmorpg.handler;
 
 import bond.memo.mmorpg.models.PlayerActions;
-import com.google.protobuf.GeneratedMessageLite;
+import bond.memo.mmorpg.service.AOISystem;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class MoveHandler extends BaseHandler implements Handler {
+public class MoveHandler extends BaseHandler<PlayerActions.Move> implements Handler {
 
-    public MoveHandler(GeneratedMessageLite msg) {
-        super(msg);
+    private MoveHandler(AOISystem aoiSystem, PlayerActions.Move msg) {
+        super(aoiSystem, msg);
+    }
+
+    public static MoveHandler of(AOISystem aoiSystem, PlayerActions.Move move) {
+        return new MoveHandler(aoiSystem, move);
     }
 
     @Override
@@ -18,6 +22,8 @@ public class MoveHandler extends BaseHandler implements Handler {
         if (msg instanceof PlayerActions.Move move) {
             log.info("MOVE action player ID {}, x `{}`, y `{}`",
                     move.getId(), move.getX(), move.getY());
+            aoiSystem.getPlayerById(move.getId()).move(move.getX()+100, move.getY()+100);
+
             ctx.writeAndFlush(new TextWebSocketFrame("Player move to position x: " + move.getX() + " y: " + move.getY()));
         }
     }

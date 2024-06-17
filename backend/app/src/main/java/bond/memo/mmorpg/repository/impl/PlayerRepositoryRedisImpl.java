@@ -37,7 +37,7 @@ public class PlayerRepositoryRedisImpl implements PlayerRepository {
         int colorRGB = Integer.parseInt(jedis.hget("player:" + playerId, "color"));
         Color color = new Color(colorRGB);
 
-        return new Player(id, name, new Player.Position(positionX, positionY), speed, radius, direction, color);
+        return new Player(id, name, Player.Position.of(positionX, positionY), speed, radius, direction, color, Boolean.FALSE);
     }
 
     public void close() {

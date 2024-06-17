@@ -1,15 +1,32 @@
 package bond.memo.mmorpg.handler;
 
+import bond.memo.mmorpg.exception.HandleBinaryDataException;
 import bond.memo.mmorpg.models.PlayerActions;
+import bond.memo.mmorpg.service.AOISystem;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.websocketx.*;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PlayerHandler extends ChannelInboundHandlerAdapter {
+
+    private final AOISystem aoiSystem;
+
+    private PlayerHandler(AOISystem aoiSystem) {
+        this.aoiSystem = aoiSystem;
+    }
+
+    public static PlayerHandler of(AOISystem aoiSystem) {
+        return new PlayerHandler(aoiSystem);
+    }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object message) {
@@ -38,25 +55,19 @@ public class PlayerHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private static void handleBinaryData(ChannelHandlerContext ctx, BinaryWebSocketFrame data) {
+    private void handleBinaryData(ChannelHandlerContext ctx, BinaryWebSocketFrame data) {
         try {
-            PlayerActions.PlayerMessage msg = PlayerActions.PlayerMessage
-                    .parseFrom(ByteBufUtil.getBytes(data.content()));
+            PlayerActions.PlayerMessage msg = PlayerActions.PlayerMessage.parseFrom(ByteBufUtil.getBytes(data.content()));
             switch (msg.getActionCase()) {
-                case JOIN:
-                    new JoinHandler(msg.getJoin()).handle(ctx);
-                    break;
-                case MOVE:
-                    new MoveHandler(msg.getMove()).handle(ctx);
-                    break;
-                case ACTION_NOT_SET:
-                    log.error("ACTION_NOT_SET");
-                    break;
-                default:
-                    log.error("Unknown action received: {}", msg.getActionCase());
+                case JOIN -> JoinHandler.of(aoiSystem, msg.getJoin()).handle(ctx);
+                case MOVE -> MoveHandler.of(aoiSystem, msg.getMove()).handle(ctx);
+                case QUIT -> QuitHandler.of(aoiSystem, msg.getQuit()).handle(ctx);
+                case ACTION_NOT_SET -> log.error("ACTION_NOT_SET");
+                default -> log.error("Unknown action received: {}", msg.getActionCase());
             }
         } catch (InvalidProtocolBufferException e) {
-            log.error("InvalidProtocolBufferException : ", e);
+            log.error(e.getMessage(), e);
+            throw new HandleBinaryDataException(e);
         }
     }
 }

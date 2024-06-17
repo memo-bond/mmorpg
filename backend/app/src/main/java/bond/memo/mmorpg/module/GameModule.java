@@ -22,6 +22,7 @@ public class GameModule extends AbstractModule {
     public static GameModule of() {
         return INSTANCE;
     }
+
     @Override
     protected void configure() {
     }
@@ -42,7 +43,7 @@ public class GameModule extends AbstractModule {
     @Singleton
     Player provideMainPlayer() {
         return Player.builder()
-                .id(300).name("Lucas").position(Player.Position.of(200, 300))
+                .id(123456).name("Louis").position(Player.Position.of(200, 300))
                 .speed(200).radius(RADIUS).direction(200)
                 .color(Color.RED)
                 .build();
