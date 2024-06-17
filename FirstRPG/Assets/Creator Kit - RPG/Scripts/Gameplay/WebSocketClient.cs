@@ -26,7 +26,7 @@ public class WebSocketClient
         await websocket.Connect();
     }
 
-    public async void Send(IMessage msg)
+    public async Task Send(IMessage msg)
     {
         if (websocket.State == WebSocketState.Open)
         {

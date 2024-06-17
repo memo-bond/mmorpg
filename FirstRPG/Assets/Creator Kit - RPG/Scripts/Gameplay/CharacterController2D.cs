@@ -5,6 +5,7 @@ using UnityEngine.U2D;
 using Google.Protobuf;
 using System.Collections;
 using NativeWebSocket;
+using Unity.VisualScripting;
 
 namespace RPGM.Gameplay
 {
@@ -177,6 +178,15 @@ namespace RPGM.Gameplay
 
         private async void OnApplicationQuit()
         {
+            PlayerMessage msg = new()
+            {
+                Quit = new()
+                {
+                    Id = 1
+                }
+            };
+            await client.Send(msg);
+            
             await client.Close();
         }
     }
