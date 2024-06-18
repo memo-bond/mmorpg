@@ -7,6 +7,8 @@ message PlayerMessage {
     Join join = 1;
     Move move = 2;
     Quit quit = 3;
+    Leave leave = 4;
+    Response response = 5;
   }
 }
 
@@ -25,4 +27,12 @@ message Move {
 
 message Quit {
   int32 id = 1;
+}
+
+message Leave {
+  int32 id = 1;
+}
+
+message Response {
+  bool success = 1;
 }

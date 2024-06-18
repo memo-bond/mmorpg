@@ -3,7 +3,9 @@ package bond.memo.mmorpg.handler;
 import bond.memo.mmorpg.model.Player;
 import bond.memo.mmorpg.models.PlayerActions;
 import bond.memo.mmorpg.service.AOISystem;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,7 +40,7 @@ public class JoinHandler extends BaseHandler<PlayerActions.Join> implements Hand
 
             aoiSystem.addPlayer(mainPlayer);
 
-            ctx.writeAndFlush(new TextWebSocketFrame("Welcome to MMORPG"));
+            response(ctx);
         }
     }
 }

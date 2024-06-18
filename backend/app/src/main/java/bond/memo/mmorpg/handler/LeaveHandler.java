@@ -9,21 +9,21 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class QuitHandler extends BaseHandler<PlayerActions.Quit> implements Handler {
+public class LeaveHandler extends BaseHandler<PlayerActions.Leave> implements Handler {
 
-    private QuitHandler(AOISystem aoiSystem, PlayerActions.Quit msg) {
+    private LeaveHandler(AOISystem aoiSystem, PlayerActions.Leave msg) {
         super(aoiSystem, msg);
     }
 
-    public static QuitHandler of(AOISystem aoiSystem, PlayerActions.Quit move) {
-        return new QuitHandler(aoiSystem, move);
+    public static LeaveHandler of(AOISystem aoiSystem, PlayerActions.Leave leave) {
+        return new LeaveHandler(aoiSystem, leave);
     }
 
     @Override
     public void handle(ChannelHandlerContext ctx) {
-        if (msg instanceof PlayerActions.Quit quit) {
-            log.info("QUIT action player ID {}", quit.getId());
-            aoiSystem.removePlayer(quit.getId());
+        if (msg instanceof PlayerActions.Leave leave) {
+            log.info("QUIT action player ID {}", leave.getId());
+            aoiSystem.removePlayer(leave.getId());
 
             response(ctx);
         }

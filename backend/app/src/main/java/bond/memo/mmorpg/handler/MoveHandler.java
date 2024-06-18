@@ -3,7 +3,6 @@ package bond.memo.mmorpg.handler;
 import bond.memo.mmorpg.models.PlayerActions;
 import bond.memo.mmorpg.service.AOISystem;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -24,7 +23,8 @@ public class MoveHandler extends BaseHandler<PlayerActions.Move> implements Hand
                     move.getId(), move.getX(), move.getY());
             aoiSystem.getPlayerById(move.getId()).move(move.getX()+100, move.getY()+100);
 
-            ctx.writeAndFlush(new TextWebSocketFrame("Player move to position x: " + move.getX() + " y: " + move.getY()));
+            response(ctx);
         }
     }
+
 }

@@ -1,11 +1,8 @@
-﻿using System.IO;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Creator_Kit___RPG.Scripts.Connection;
+using NativeWebSocket;
 using UnityEngine;
 using UnityEngine.U2D;
-using Google.Protobuf;
-using System.Collections;
-using NativeWebSocket;
-using Unity.VisualScripting;
 
 namespace RPGM.Gameplay
 {
@@ -16,8 +13,9 @@ namespace RPGM.Gameplay
     {
         [SerializeField]
         private bool online = false;
-
-        private WebSocketClient client;
+        
+        [SerializeField]
+        private ConnectionManager client;
 
         public float speed = 1;
         public float acceleration = 2;
@@ -44,8 +42,39 @@ namespace RPGM.Gameplay
         float distance;
         float velocity;
 
+        private bool main;
+        private int id;
+        private string name;
+        private Vector3 position;
+        
+        public bool Main
+        {
+            get { return main; }
+            set { main = value; }
+        }
+        
+        public int Id
+        {
+            get { return id; }
+            set { id = value; }
+        }
+
+        public string Name
+        {
+            get { return name; }
+            set { name = value; }
+        }
+
+        public Vector3 Position
+        {
+            get { return position; }
+            set { position = value; }
+        }
+        
+
         private async void Start()
         {
+            main = true;
             await StartAsync();
         }
 
@@ -53,15 +82,13 @@ namespace RPGM.Gameplay
         {
             lastPosition = transform.position;
 
-            if (online)
+            if (online && main)
             {
-                client = new WebSocketClient("ws://localhost:6666/ws");
-                Debug.Log("Client state 1 " + client.State());
-
-                await Connect();
-                
-                Debug.Log("Client state 2 " + client.State());
-
+                while (client.State() != WebSocketState.Open)
+                {
+                    await Task.Delay(10);
+                }
+                Debug.Log("Joining To Server");
                 PlayerMessage msg = new()
                 {
                     Join = new()
@@ -73,21 +100,12 @@ namespace RPGM.Gameplay
                     }
                 };
                 
-                client.Send(msg);
+                await client.Send(msg);
+                Debug.Log("await client.Send(msg);");
             }
         }
 
-        private async Task Connect()
-        {
-            _ = client.Connect();
-
-            while (client.State() != WebSocketState.Open)
-            {
-                await Task.Delay(10);
-            }
-        }
-
-        void IdleState()
+        private void IdleState()
         {
             if (nextMoveCommand != Vector3.zero)
             {
@@ -101,42 +119,30 @@ namespace RPGM.Gameplay
             }
         }
 
-        void MoveState()
+        private void MoveState()
         {
             velocity = Mathf.Clamp01(velocity + Time.deltaTime * acceleration);
             UpdateAnimator(nextMoveCommand);
             rigidbody2D.velocity = Vector2.SmoothDamp(rigidbody2D.velocity, nextMoveCommand * speed, ref currentVelocity, acceleration, speed);
             spriteRenderer.flipX = rigidbody2D.velocity.x >= 0 ? true : false;
 
-            if (online)
+            if (!online) return; // guard
+            if (!(Vector3.Distance(transform.position, lastPosition) > positionUpdateThreshold)) return; // guard
+            
+            PlayerMessage msg = new()
             {
-                // send to server
-                if (Vector3.Distance(transform.position, lastPosition) > positionUpdateThreshold)
+                Move = new()
                 {
-                    PlayerMessage msg = new()
-                    {
-                        Move = new()
-                        {
-                            Id = 1,
-                            X = transform.position.x,
-                            Y = transform.position.y
-                        }
-                    };
-
-                    byte[] bytes;
-                    using (var stream = new MemoryStream())
-                    {
-                        msg.WriteTo(stream);
-                        bytes = stream.ToArray();
-                    }
-                    client.Send(msg);
-
-                    lastPosition = transform.position;
+                    Id = 1,
+                    X = transform.position.x,
+                    Y = transform.position.y
                 }
-            }
+            };
+            _ = client.Send(msg);
+            lastPosition = transform.position;
         }
 
-        void UpdateAnimator(Vector3 direction)
+        private void UpdateAnimator(Vector3 direction)
         {
             if (animator)
             {
@@ -145,11 +151,8 @@ namespace RPGM.Gameplay
             }
         }
 
-        void Update()
+        private void Update()
         {
-#if !UNITY_WEBGL || UNITY_EDITOR
-            client.DispatchMessageQueue();
-#endif
             switch (state)
             {
                 case State.Idle:
@@ -161,19 +164,19 @@ namespace RPGM.Gameplay
             }
         }
 
-        void LateUpdate()
+        private void LateUpdate()
         {
-            if (pixelPerfectCamera != null)
+            if (pixelPerfectCamera)
             {
                 transform.position = pixelPerfectCamera.RoundToPixel(transform.position);
             }
         }
 
-        void Awake()
+        private void Awake()
         {
             rigidbody2D = GetComponent<Rigidbody2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
-            pixelPerfectCamera = GameObject.FindObjectOfType<PixelPerfectCamera>();
+            pixelPerfectCamera = FindObjectOfType<PixelPerfectCamera>();
         }
 
         private async void OnApplicationQuit()
@@ -186,8 +189,6 @@ namespace RPGM.Gameplay
                 }
             };
             await client.Send(msg);
-            
-            await client.Close();
         }
     }
 }

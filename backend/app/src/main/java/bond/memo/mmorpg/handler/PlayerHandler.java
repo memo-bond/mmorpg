@@ -62,6 +62,7 @@ public class PlayerHandler extends ChannelInboundHandlerAdapter {
                 case JOIN -> JoinHandler.of(aoiSystem, msg.getJoin()).handle(ctx);
                 case MOVE -> MoveHandler.of(aoiSystem, msg.getMove()).handle(ctx);
                 case QUIT -> QuitHandler.of(aoiSystem, msg.getQuit()).handle(ctx);
+                case LEAVE -> LeaveHandler.of(aoiSystem, msg.getLeave()).handle(ctx);
                 case ACTION_NOT_SET -> log.error("ACTION_NOT_SET");
                 default -> log.error("Unknown action received: {}", msg.getActionCase());
             }
