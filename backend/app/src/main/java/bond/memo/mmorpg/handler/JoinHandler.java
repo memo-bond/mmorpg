@@ -3,10 +3,7 @@ package bond.memo.mmorpg.handler;
 import bond.memo.mmorpg.model.Player;
 import bond.memo.mmorpg.models.PlayerActions;
 import bond.memo.mmorpg.service.AOISystem;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import lombok.extern.slf4j.Slf4j;
 
 import java.awt.Color;
@@ -18,7 +15,7 @@ public class JoinHandler extends BaseHandler<PlayerActions.Join> implements Hand
         super(aoiSystem, msg);
     }
 
-    public static JoinHandler of(AOISystem aoiSystem, PlayerActions.Join msg) {
+    public static JoinHandler from(AOISystem aoiSystem, PlayerActions.Join msg) {
         return new JoinHandler(aoiSystem, msg);
     }
 
@@ -31,7 +28,7 @@ public class JoinHandler extends BaseHandler<PlayerActions.Join> implements Hand
             Player mainPlayer = Player.builder()
                     .id(join.getId())
                     .name(join.getName())
-                    .position(Player.Position.of(join.getX() + 100, join.getY() + 100))
+                    .position(Player.Position.from(join.getX() + 100, join.getY() + 100))
                     .speed(100)
                     .direction(200)
                     .color(Color.BLACK)

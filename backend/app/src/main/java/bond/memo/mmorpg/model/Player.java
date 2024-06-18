@@ -58,7 +58,7 @@ public class Player {
     public void ensurePlayerWithinBounds(int gridSize) {
         float newX = Math.clamp(position.x, 0, gridSize);
         float newY = Math.clamp(position.y, 0, gridSize);
-        this.setPosition(Player.Position.of(newX, newY));
+        this.setPosition(Player.Position.from(newX, newY));
     }
 
     public boolean isPlayerOutOfBounds(int gridSize) {
@@ -77,7 +77,7 @@ public class Player {
         private float x;
         private float y;
 
-        public static Position of(float x, float y) {
+        public static Position from(float x, float y) {
             return new Position(x, y);
         }
 

@@ -12,7 +12,7 @@ public class MoveHandler extends BaseHandler<PlayerActions.Move> implements Hand
         super(aoiSystem, msg);
     }
 
-    public static MoveHandler of(AOISystem aoiSystem, PlayerActions.Move move) {
+    public static MoveHandler from(AOISystem aoiSystem, PlayerActions.Move move) {
         return new MoveHandler(aoiSystem, move);
     }
 
@@ -21,7 +21,7 @@ public class MoveHandler extends BaseHandler<PlayerActions.Move> implements Hand
         if (msg instanceof PlayerActions.Move move) {
             log.info("MOVE action player ID {}, x `{}`, y `{}`",
                     move.getId(), move.getX(), move.getY());
-            aoiSystem.getPlayerById(move.getId()).move(move.getX()+100, move.getY()+100);
+            aoiSystem.getPlayerById(move.getId()).move(move.getX(), move.getY());
 
             response(ctx);
         }

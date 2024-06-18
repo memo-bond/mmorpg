@@ -6,9 +6,10 @@ package bond.memo.mmorpg;
 import bond.memo.mmorpg.handler.HttpServerHandler;
 import bond.memo.mmorpg.module.AutoServiceModule;
 import bond.memo.mmorpg.module.GameModule;
-import bond.memo.mmorpg.service.aoi.AOISystemImpl;
+import bond.memo.mmorpg.service.AOISystem;
 import bond.memo.mmorpg.visualizer.AOIVisualizer;
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBufAllocator;
@@ -32,19 +33,22 @@ import static bond.memo.mmorpg.constants.Constants.SERVER_PORT;
 public class GameServer {
 
     private final int port;
+    private final AOISystem aoiSystem;
 
-    public GameServer(int port) {
+    @Inject
+    public GameServer(int port, AOISystem aoiSystem) {
         this.port = port;
+        this.aoiSystem = aoiSystem;
     }
 
-    public void start(AOISystemImpl aoiSystem) throws InterruptedException {
+    public void start() throws InterruptedException {
 
         try (EventLoopGroup bossGroup = new NioEventLoopGroup();
              EventLoopGroup workerGroup = new NioEventLoopGroup()) {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
-                    .childHandler(serverInitializer(aoiSystem))
+                    .childHandler(serverInitializer())
                     .option(ChannelOption.ALLOCATOR, ByteBufAllocator.DEFAULT)
                     .option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
@@ -54,7 +58,7 @@ public class GameServer {
         }
     }
 
-    private static ChannelInitializer<SocketChannel> serverInitializer(AOISystemImpl aoiSystem) {
+    private ChannelInitializer<SocketChannel> serverInitializer() {
 
         return new ChannelInitializer<>() {
             @Override
@@ -63,7 +67,7 @@ public class GameServer {
 
                 // Setup Websocket
                 pipeline.addLast(new HttpServerCodec());
-                pipeline.addLast(HttpServerHandler.of(aoiSystem));
+                pipeline.addLast(HttpServerHandler.from(aoiSystem));
                 pipeline.addLast(new HttpObjectAggregator(65536));
                 pipeline.addLast(new ChunkedWriteHandler());
                 pipeline.addLast(new WebSocketServerProtocolHandler("/ws"));
@@ -75,9 +79,8 @@ public class GameServer {
         try {
             log.info("Server started on port {}", SERVER_PORT);
             Injector injector = Guice.createInjector(AutoServiceModule.of(), GameModule.of());
-            AOISystemImpl aoiSystem = injector.getInstance(AOISystemImpl.class);
             injector.getInstance(AOIVisualizer.class).startGui();
-            injector.getInstance(GameServer.class).start(aoiSystem);
+            injector.getInstance(GameServer.class).start();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.error(e.getMessage(), e);

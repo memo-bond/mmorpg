@@ -19,7 +19,7 @@ public class MyRandomizer {
     private final Faker faker;
     private final Random random;
 
-    public MyRandomizer() {
+    private MyRandomizer() {
         EasyRandomParameters parameters = new EasyRandomParameters()
                 .randomize(field -> field.getName().equals("speed"), new FloatRangeRandomizer(50.0f, 100.0f))
                 .randomize(field -> field.getName().equals("radius"), new FloatRangeRandomizer(40.0f, 60.0f))

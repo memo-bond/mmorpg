@@ -24,7 +24,7 @@ public class PlayerHandler extends ChannelInboundHandlerAdapter {
         this.aoiSystem = aoiSystem;
     }
 
-    public static PlayerHandler of(AOISystem aoiSystem) {
+    public static PlayerHandler from(AOISystem aoiSystem) {
         return new PlayerHandler(aoiSystem);
     }
 
@@ -33,36 +33,36 @@ public class PlayerHandler extends ChannelInboundHandlerAdapter {
         if (message instanceof WebSocketFrame) {
             switch (message) {
                 case BinaryWebSocketFrame data -> handleBinaryData(ctx, data);
-                case TextWebSocketFrame textWebSocketFrame -> {
-                    log.info("TextWebSocketFrame Received : ");
-                    ctx.channel().writeAndFlush(
-                            new TextWebSocketFrame("Message recieved : " + textWebSocketFrame.text()));
-                    log.info(textWebSocketFrame.text());
-                }
-                case PingWebSocketFrame pingWebSocketFrame -> {
-                    log.info("PingWebSocketFrame Received : {}", pingWebSocketFrame.content());
-                }
-                case PongWebSocketFrame pongWebSocketFrame -> {
-                    log.info("PongWebSocketFrame Received : {}", pongWebSocketFrame.content());
-                }
-                case CloseWebSocketFrame closeWebSocketFrame -> {
-                    log.warn("CloseWebSocketFrame Received : ");
-                    log.warn("ReasonText :{}", closeWebSocketFrame.reasonText());
-                    log.warn("StatusCode : {}", closeWebSocketFrame.statusCode());
-                }
+                case TextWebSocketFrame text -> handleTextData(ctx, text);
+                case PingWebSocketFrame ping -> log.info("PingWebSocketFrame Received : {}", ping.content());
+                case PongWebSocketFrame pong -> log.info("PongWebSocketFrame Received : {}", pong.content());
+                case CloseWebSocketFrame signal -> handleCloseEvent(signal);
                 default -> log.error("Unsupported WebSocketFrame");
             }
         }
+    }
+
+    private static void handleCloseEvent(CloseWebSocketFrame closeWebSocketFrame) {
+        log.warn("CloseWebSocketFrame Received : ");
+        log.warn("ReasonText :{}", closeWebSocketFrame.reasonText());
+        log.warn("StatusCode : {}", closeWebSocketFrame.statusCode());
+    }
+
+    private static void handleTextData(ChannelHandlerContext ctx, TextWebSocketFrame textWebSocketFrame) {
+        log.info("TextWebSocketFrame Received : ");
+        ctx.channel().writeAndFlush(
+                new TextWebSocketFrame("Message recieved : " + textWebSocketFrame.text()));
+        log.info(textWebSocketFrame.text());
     }
 
     private void handleBinaryData(ChannelHandlerContext ctx, BinaryWebSocketFrame data) {
         try {
             PlayerActions.PlayerMessage msg = PlayerActions.PlayerMessage.parseFrom(ByteBufUtil.getBytes(data.content()));
             switch (msg.getActionCase()) {
-                case JOIN -> JoinHandler.of(aoiSystem, msg.getJoin()).handle(ctx);
-                case MOVE -> MoveHandler.of(aoiSystem, msg.getMove()).handle(ctx);
-                case QUIT -> QuitHandler.of(aoiSystem, msg.getQuit()).handle(ctx);
-                case LEAVE -> LeaveHandler.of(aoiSystem, msg.getLeave()).handle(ctx);
+                case JOIN -> JoinHandler.from(aoiSystem, msg.getJoin()).handle(ctx);
+                case MOVE -> MoveHandler.from(aoiSystem, msg.getMove()).handle(ctx);
+                case QUIT -> QuitHandler.from(aoiSystem, msg.getQuit()).handle(ctx);
+                case LEAVE -> LeaveHandler.from(aoiSystem, msg.getLeave()).handle(ctx);
                 case ACTION_NOT_SET -> log.error("ACTION_NOT_SET");
                 default -> log.error("Unknown action received: {}", msg.getActionCase());
             }

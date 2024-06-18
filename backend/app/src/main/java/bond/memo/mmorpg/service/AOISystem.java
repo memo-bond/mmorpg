@@ -19,4 +19,8 @@ public interface AOISystem {
     Map<Integer, Map<Integer, GridCell>> getGrid();
 
     int getCellIndex(float v);
+
+    int getGridSize();
+
+    int getCellSize();
 }

@@ -1,13 +1,15 @@
 package bond.memo.mmorpg.visualizer;
 
+import bond.memo.mmorpg.client.WebSocketClient;
 import bond.memo.mmorpg.config.adapter.KeyListenerAdapter;
 import bond.memo.mmorpg.config.adapter.MouseListenerAdapter;
+import bond.memo.mmorpg.models.PlayerActions;
 import bond.memo.mmorpg.service.AOISystem;
-import bond.memo.mmorpg.service.aoi.AOISystemImpl;
 import bond.memo.mmorpg.service.aoi.GridCell;
 import bond.memo.mmorpg.model.Player;
 import bond.memo.mmorpg.random.MyRandomizer;
 import bond.memo.mmorpg.service.PlayerService;
+import com.google.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.JFrame;
@@ -22,6 +24,8 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 
 import static bond.memo.mmorpg.constants.Constants.RADIUS;
 
@@ -30,20 +34,21 @@ public class AOIVisualizer extends JPanel {
 
     private final int gridSize;
     private final int cellSize;
+    private final WebSocketClient client;
     private final transient AOISystem aoiSystem;
     private final transient Player mainPlayer;
     private final transient List<Player> players;
 
-    public static AOIVisualizer from(AOISystemImpl aoiSystem, Player mainPlayer) {
-        return new AOIVisualizer(aoiSystem, mainPlayer);
-    }
-
-    private AOIVisualizer(AOISystemImpl aoiSystem, Player mainPlayer) {
+    @Inject
+    public AOIVisualizer(AOISystem aoiSystem, Player mainPlayer) {
         this.gridSize = aoiSystem.getGridSize();
         this.cellSize = aoiSystem.getCellSize();
         this.aoiSystem = aoiSystem;
         this.mainPlayer = mainPlayer;
         this.players = new CopyOnWriteArrayList<>();
+        this.client = WebSocketClient.of();
+
+        aoiSystem.addPlayer(mainPlayer);
 
         setPreferredSize(new Dimension(gridSize, gridSize));
         Timer timer = new Timer(100, e -> {
@@ -76,23 +81,33 @@ public class AOIVisualizer extends JPanel {
 
     private void controlMainPlayer(KeyEvent e) {
         if (mainPlayer != null) {
+            Player p = mainPlayer;
             int key = e.getKeyCode();
             float moveAmount = 5.0f;
 
             switch (key) {
                 case KeyEvent.VK_UP, KeyEvent.VK_W ->
-                        mainPlayer.setPosition(Player.Position.of(mainPlayer.getPosition().getX(), mainPlayer.getPosition().getY() - moveAmount));
+                        move(p, p.getPosition().getX(), p.getPosition().getY() - moveAmount);
                 case KeyEvent.VK_DOWN, KeyEvent.VK_S ->
-                        mainPlayer.setPosition(Player.Position.of(mainPlayer.getPosition().getX(), mainPlayer.getPosition().getY() + moveAmount));
+                        move(p, p.getPosition().getX(), p.getPosition().getY() + moveAmount);
                 case KeyEvent.VK_LEFT, KeyEvent.VK_A ->
-                        mainPlayer.setPosition(Player.Position.of(mainPlayer.getPosition().getX() - moveAmount, mainPlayer.getPosition().getY()));
+                        move(p, p.getPosition().getX() - moveAmount, p.getPosition().getY());
                 case KeyEvent.VK_RIGHT, KeyEvent.VK_D ->
-                        mainPlayer.setPosition(Player.Position.of(mainPlayer.getPosition().getX() + moveAmount, mainPlayer.getPosition().getY()));
+                        move(p, p.getPosition().getX() + moveAmount, p.getPosition().getY());
                 default -> log.info("Unknown key code {}", key);
             }
             mainPlayer.ensurePlayerWithinBounds(gridSize);
             repaint();
         }
+    }
+
+    private void move(Player p, float x, float y) {
+        p.setPosition(Player.Position.from(x, y));
+        client.send(PlayerActions.PlayerMessage.newBuilder()
+                .setMove(PlayerActions.Move.newBuilder()
+                        .setId(p.getId()).setX(x).setY(y).build())
+                .build().toByteArray()
+        );
     }
 
     private void updatePlayerPositions() {
@@ -129,7 +144,6 @@ public class AOIVisualizer extends JPanel {
             aoiSystem.addPlayer(player);
         }
     }
-
 
     private void handlePlayerCollisions(Player player) {
         for (Map<Integer, GridCell> column : aoiSystem.getGrid().values()) {

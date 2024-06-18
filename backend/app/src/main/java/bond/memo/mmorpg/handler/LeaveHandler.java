@@ -2,10 +2,7 @@ package bond.memo.mmorpg.handler;
 
 import bond.memo.mmorpg.models.PlayerActions;
 import bond.memo.mmorpg.service.AOISystem;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -15,7 +12,7 @@ public class LeaveHandler extends BaseHandler<PlayerActions.Leave> implements Ha
         super(aoiSystem, msg);
     }
 
-    public static LeaveHandler of(AOISystem aoiSystem, PlayerActions.Leave leave) {
+    public static LeaveHandler from(AOISystem aoiSystem, PlayerActions.Leave leave) {
         return new LeaveHandler(aoiSystem, leave);
     }
 
