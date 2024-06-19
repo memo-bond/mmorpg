@@ -43,6 +43,11 @@ public class AOISystemRedisImpl extends BaseAOISystem {
         }
     }
 
+    @Override
+    public Map<Integer, Player> getPlayerMap() {
+        return Map.of();
+    }
+
     public void addPlayer(Player player) {
         updatePlayerPosition(player, player.getPosition().getX(), player.getPosition().getY());
     }

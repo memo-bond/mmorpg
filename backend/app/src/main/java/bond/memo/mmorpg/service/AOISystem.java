@@ -8,6 +8,8 @@ import java.util.Map;
 
 public interface AOISystem {
 
+    Map<Integer, Player> getPlayerMap();
+
     void addPlayer(Player player);
 
     Player getPlayerById(int playerId);

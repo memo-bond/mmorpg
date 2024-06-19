@@ -17,6 +17,7 @@ public class AOISystemImpl extends BaseAOISystem {
     private final int cellSize;
     @Getter
     private final Map<Integer, Map<Integer, GridCell>> grid = new ConcurrentHashMap<>();
+    @Getter
     private final Map<Integer, Player> playerMap = new ConcurrentHashMap<>();
 
     public AOISystemImpl(int gridSize, int cellSize) {

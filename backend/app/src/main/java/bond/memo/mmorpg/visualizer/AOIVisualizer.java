@@ -23,6 +23,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
@@ -34,7 +36,9 @@ public class AOIVisualizer extends JPanel {
 
     private final int gridSize;
     private final int cellSize;
-    private final WebSocketClient client;
+    private final transient WebSocketClient client;
+    private final transient JoinServerHandler joinServerHandler;
+    private final transient PlayerMoveHandler playerMoveHandler;
     private final transient AOISystem aoiSystem;
     private final transient Player mainPlayer;
     private final transient List<Player> players;
@@ -45,13 +49,18 @@ public class AOIVisualizer extends JPanel {
         this.cellSize = aoiSystem.getCellSize();
         this.aoiSystem = aoiSystem;
         this.mainPlayer = mainPlayer;
-        this.players = new CopyOnWriteArrayList<>();
+        this.players = new CopyOnWriteArrayList<>(aoiSystem.getPlayerMap().values());
         this.client = WebSocketClient.of();
+        this.joinServerHandler = new JoinServerHandler(this.client, new ConcurrentLinkedQueue<>());
+        this.playerMoveHandler = new PlayerMoveHandler(this.client, new ConcurrentLinkedQueue<>());
+        new Thread(joinServerHandler).start();
+        new Thread(playerMoveHandler).start();
 
         aoiSystem.addPlayer(mainPlayer);
+        joinServerHandler.addQueuePlayer(mainPlayer);
 
         setPreferredSize(new Dimension(gridSize, gridSize));
-        Timer timer = new Timer(100, e -> {
+        Timer timer = new Timer(500, e -> {
             updatePlayerPositions();
             checkMainPlayerCollisions();
             repaint();
@@ -62,6 +71,26 @@ public class AOIVisualizer extends JPanel {
         addKeyListener(KeyListenerAdapter.adapter(this::controlMainPlayer));
         addMouseListener(MouseListenerAdapter.adapter(this::handleMouseClick));
         setFocusable(true);
+    }
+
+    public void startGui() {
+        JFrame frame = new JFrame("AOI Visualizer");
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        // Add example players
+        Player p1 = PlayerService.nextPlayer();
+        Player p2 = PlayerService.nextPlayer();
+        log.info("Player 1 {}", p1);
+        log.info("Player 2 {}", p2);
+        aoiSystem.addPlayer(p1);
+        aoiSystem.addPlayer(p2);
+
+        joinServerHandler.addQueuePlayer(p1);
+        joinServerHandler.addQueuePlayer(p2);
+
+        frame.add(this);
+        frame.pack();
+        frame.setVisible(true);
     }
 
     private void checkMainPlayerCollisions() {
@@ -96,18 +125,14 @@ public class AOIVisualizer extends JPanel {
                         move(p, p.getPosition().getX() + moveAmount, p.getPosition().getY());
                 default -> log.info("Unknown key code {}", key);
             }
-            mainPlayer.ensurePlayerWithinBounds(gridSize);
+            p.ensurePlayerWithinBounds(gridSize);
             repaint();
         }
     }
 
     private void move(Player p, float x, float y) {
         p.setPosition(Player.Position.from(x, y));
-        client.send(PlayerActions.PlayerMessage.newBuilder()
-                .setMove(PlayerActions.Move.newBuilder()
-                        .setId(p.getId()).setX(x).setY(y).build())
-                .build().toByteArray()
-        );
+        playerMoveHandler.move(p.moveMsg());
     }
 
     private void updatePlayerPositions() {
@@ -126,11 +151,12 @@ public class AOIVisualizer extends JPanel {
         repaint(); // Redraw the grid with updated player positions
     }
 
-    private void movePlayer(Player player) {
-        player.moveGui(0.1f);
+    private void movePlayer(Player p) {
+        p.moveGui(0.1f);
 
-        if (player.isPlayerOutOfBounds(gridSize))
-            player.setDirection(MyRandomizer.random().nextFloat() * 360);
+        if (p.isPlayerOutOfBounds(gridSize))
+            p.setDirection(MyRandomizer.random().nextFloat() * 360);
+        playerMoveHandler.move(p.moveMsg());
     }
 
     private void updatePlayerCell(Player player, GridCell cell) {
@@ -149,7 +175,7 @@ public class AOIVisualizer extends JPanel {
         for (Map<Integer, GridCell> column : aoiSystem.getGrid().values()) {
             for (GridCell cell : column.values()) {
                 for (Player otherPlayer : cell.getPlayers()) {
-                    if (player != otherPlayer && player.isCollision(otherPlayer)) {
+                    if (player.getId() != otherPlayer.getId() && player.isCollision(otherPlayer)) {
                         // Perform action when collision occurs
                         // Example action: Change player direction
                         player.setDirection(player.getDirection() + 180); // Reverse direction
@@ -163,10 +189,10 @@ public class AOIVisualizer extends JPanel {
 
     private void handleMouseClick(MouseEvent e) {
         Player player = PlayerService.nextPlayer();
-        player.getPosition().setX(e.getX());
-        player.getPosition().setY(e.getY());
+        player.position(e.getX(), e.getY());
         aoiSystem.addPlayer(player);
         players.add(player);
+        joinServerHandler.addQueuePlayer(player);
         repaint(); // Redraw the grid with the new player and AOI
     }
 
@@ -206,19 +232,73 @@ public class AOIVisualizer extends JPanel {
         }
     }
 
-    public void startGui() {
-        JFrame frame = new JFrame("AOI Visualizer");
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    static class JoinServerHandler implements Runnable {
 
-        // Add example players
-        Player p1 = PlayerService.nextPlayer();
-        Player p2 = PlayerService.nextPlayer();
-        aoiSystem.addPlayer(p1);
-        aoiSystem.addPlayer(p2);
+        private final WebSocketClient client;
+        private final Queue<Player> queue;
+        private volatile boolean running = true;
 
-        frame.add(this);
-        frame.pack();
-        frame.setVisible(true);
+        public JoinServerHandler(WebSocketClient client, Queue<Player> queue) {
+            this.client = client;
+            this.queue = queue;
+        }
+
+        public void addQueuePlayer(Player player) {
+            this.queue.add(player);
+        }
+
+        public void stop() {
+            this.running = false;
+        }
+
+        @Override
+        public void run() {
+            LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(1));
+            while (running) {
+                while (!queue.isEmpty() && client != null) {
+                    Player p = queue.poll();
+                    log.info("JoinServer player join {}", p);
+                    if (p != null)
+                        client.send(p.joinMsgBytes());
+                    LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(10));
+                }
+                LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
+            }
+        }
+    }
+
+    static class PlayerMoveHandler implements Runnable {
+
+        private final WebSocketClient client;
+        private final Queue<PlayerActions.PlayerMessage> queue;
+        private volatile boolean running = true;
+
+        public PlayerMoveHandler(WebSocketClient client, Queue<PlayerActions.PlayerMessage> queue) {
+            this.client = client;
+            this.queue = queue;
+        }
+
+        public void move(PlayerActions.PlayerMessage move) {
+            this.queue.add(move);
+        }
+
+        public void stop() {
+            this.running = false;
+        }
+
+        @Override
+        public void run() {
+            LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(1));
+            while (running) {
+                while (!queue.isEmpty() && client != null) {
+                    PlayerActions.PlayerMessage move = queue.poll();
+                    if (move != null)
+                        client.send(move.toByteArray());
+                    LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(2));
+                }
+                LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
+            }
+        }
     }
 }
 

@@ -9,6 +9,7 @@ import java.net.http.HttpClient;
 import java.net.http.WebSocket;
 import java.net.http.WebSocket.Listener;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
@@ -29,6 +30,7 @@ public class WebSocketClient {
     }
 
     public void send(byte[] data) {
+        Objects.requireNonNull(data, "Websocket Data could not be NULL");
         websocket.sendBinary(ByteBuffer.wrap(data), true);
     }
 

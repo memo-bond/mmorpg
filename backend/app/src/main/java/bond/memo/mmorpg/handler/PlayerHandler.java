@@ -13,6 +13,7 @@ import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -30,15 +31,19 @@ public class PlayerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object message) {
-        if (message instanceof WebSocketFrame) {
-            switch (message) {
-                case BinaryWebSocketFrame data -> handleBinaryData(ctx, data);
-                case TextWebSocketFrame text -> handleTextData(ctx, text);
-                case PingWebSocketFrame ping -> log.info("PingWebSocketFrame Received : {}", ping.content());
-                case PongWebSocketFrame pong -> log.info("PongWebSocketFrame Received : {}", pong.content());
-                case CloseWebSocketFrame signal -> handleCloseEvent(signal);
-                default -> log.error("Unsupported WebSocketFrame");
+        try {
+            if (message instanceof WebSocketFrame) {
+                switch (message) {
+                    case BinaryWebSocketFrame data -> handleBinaryData(ctx, data);
+                    case TextWebSocketFrame text -> handleTextData(ctx, text);
+                    case PingWebSocketFrame ping -> log.info("PingWebSocketFrame Received : {}", ping.content());
+                    case PongWebSocketFrame pong -> log.info("PongWebSocketFrame Received : {}", pong.content());
+                    case CloseWebSocketFrame signal -> handleCloseEvent(signal);
+                    default -> log.error("Unsupported WebSocketFrame");
+                }
             }
+        } finally {
+            ReferenceCountUtil.release(message); // Ensure that the buffer is released
         }
     }
 

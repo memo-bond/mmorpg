@@ -1,5 +1,6 @@
 package bond.memo.mmorpg.model;
 
+import bond.memo.mmorpg.models.PlayerActions;
 import bond.memo.mmorpg.utils.ColorUtil;
 import lombok.Builder;
 import lombok.Data;
@@ -37,6 +38,27 @@ public class Player {
         this.main = main;
     }
 
+    public byte[] moveMsgBytes() {
+        return PlayerActions.PlayerMessage.newBuilder()
+                .setMove(PlayerActions.Move.newBuilder()
+                        .setId(id).setX(position.x).setY(position.y).build())
+                .build().toByteArray();
+    }
+
+    public PlayerActions.PlayerMessage moveMsg() {
+        return PlayerActions.PlayerMessage.newBuilder()
+                .setMove(PlayerActions.Move.newBuilder()
+                        .setId(id).setX(position.x).setY(position.y).build())
+                .build();
+    }
+
+    public byte[] joinMsgBytes() {
+        return PlayerActions.PlayerMessage.newBuilder()
+                .setJoin(PlayerActions.Join.newBuilder()
+                        .setId(id).setX(position.x).setY(position.y).build())
+                .build().toByteArray();
+    }
+
     public void moveGui(float deltaTime) {
         float radians = (float) Math.toRadians(direction);
         position.setX(position.getX() + speed * (float) Math.cos(radians) * deltaTime);
@@ -48,11 +70,15 @@ public class Player {
         position.y = y;
     }
 
-    public boolean isCollision(Player player2) {
-        float dx = position.getX() - player2.getPosition().getX();
-        float dy = position.getY() - player2.getPosition().getY();
+    public boolean isCollision(Player otherPlayer) {
+        if (id == otherPlayer.getId()) return false;
+        float dx = position.getX() - otherPlayer.getPosition().getX();
+        float dy = position.getY() - otherPlayer.getPosition().getY();
         float distance = (float) Math.sqrt(dx * dx + dy * dy);
-        return distance <= radius + player2.getRadius();
+        boolean collided = distance <= radius + otherPlayer.getRadius();
+        if (collided)
+            log.info("Player ID `{}` name `{}` collided with player ID `{}` name `{}`", id, name, otherPlayer.getId(), otherPlayer.getName());
+        return collided;
     }
 
     public void ensurePlayerWithinBounds(int gridSize) {
@@ -70,6 +96,11 @@ public class Player {
         float dx = position.x - p2.getX();
         float dy = position.y - p2.getY();
         return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    public void position(int x, int y) {
+        position.x = x;
+        position.y = y;
     }
 
     @Data

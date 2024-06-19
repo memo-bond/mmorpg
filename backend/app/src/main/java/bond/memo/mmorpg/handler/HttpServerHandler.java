@@ -8,6 +8,7 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
+import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -25,23 +26,26 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        try {
+            if (msg instanceof HttpRequest httpRequest) {
 
-        if (msg instanceof HttpRequest httpRequest) {
+                HttpHeaders headers = httpRequest.headers();
+                if ("Upgrade".equalsIgnoreCase(headers.get(HttpHeaderNames.CONNECTION)) &&
+                        "WebSocket".equalsIgnoreCase(headers.get(HttpHeaderNames.UPGRADE))) {
 
-            HttpHeaders headers = httpRequest.headers();
-            if ("Upgrade".equalsIgnoreCase(headers.get(HttpHeaderNames.CONNECTION)) &&
-                    "WebSocket".equalsIgnoreCase(headers.get(HttpHeaderNames.UPGRADE))) {
+                    //Adding new handler to the existing pipeline to handle WebSocket Messages
+                    ctx.pipeline().replace(this, "websocketHandler", PlayerHandler.from(aoiSystem));
 
-                //Adding new handler to the existing pipeline to handle WebSocket Messages
-                ctx.pipeline().replace(this, "websocketHandler", PlayerHandler.from(aoiSystem));
-
-                log.info("Handshaking....");
-                //Do the Handshake to upgrade connection from HTTP to WebSocket protocol
-                handleHandshake(ctx, httpRequest);
-                log.info("Handshake is done");
+                    log.info("Handshaking....");
+                    //Do the Handshake to upgrade connection from HTTP to WebSocket protocol
+                    handleHandshake(ctx, httpRequest);
+                    log.info("Handshake is done");
+                }
+            } else {
+                log.warn("Incoming request is unknown");
             }
-        } else {
-            log.warn("Incoming request is unknown");
+        } finally {
+            ReferenceCountUtil.release(msg); // Ensure that the buffer is released
         }
     }
 

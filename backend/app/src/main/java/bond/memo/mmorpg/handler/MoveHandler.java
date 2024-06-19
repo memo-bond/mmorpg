@@ -19,10 +19,8 @@ public class MoveHandler extends BaseHandler<PlayerActions.Move> implements Hand
     @Override
     public void handle(ChannelHandlerContext ctx) {
         if (msg instanceof PlayerActions.Move move) {
-            log.info("MOVE action player ID {}, x `{}`, y `{}`",
-                    move.getId(), move.getX(), move.getY());
+//            log.info("MOVE action player ID {}, x `{}`, y `{}`", move.getId(), move.getX(), move.getY());
             aoiSystem.getPlayerById(move.getId()).move(move.getX(), move.getY());
-
             response(ctx);
         }
     }
