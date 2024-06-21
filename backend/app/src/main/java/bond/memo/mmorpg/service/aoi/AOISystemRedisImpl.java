@@ -44,6 +44,11 @@ public class AOISystemRedisImpl extends BaseAOISystem {
     }
 
     @Override
+    public List<Player> getPlayers() {
+        return List.of();
+    }
+
+    @Override
     public Map<Integer, Player> getPlayerMap() {
         return Map.of();
     }

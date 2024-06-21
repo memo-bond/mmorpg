@@ -17,7 +17,10 @@ import java.util.concurrent.locks.LockSupport;
 @Slf4j
 public class WebSocketClient {
 
+    private  static final String SERVER_HOST = "ws://127.0.0.1/ws";
+
     private WebSocketListener webSocketListener;
+
     @Getter
     private WebSocket websocket;
 
@@ -42,7 +45,7 @@ public class WebSocketClient {
                 log.info("wait 500ms for server started");
                 LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500));
                 websocket = client.newWebSocketBuilder()
-                        .buildAsync(URI.create("ws://127.0.0.1:6666/ws"), webSocketListener).join();
+                        .buildAsync(URI.create(SERVER_HOST), webSocketListener).join();
             } catch (Exception e) {
                 log.error("Websocket client error due to ", e);
             }

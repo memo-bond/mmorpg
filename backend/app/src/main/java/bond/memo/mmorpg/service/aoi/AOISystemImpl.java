@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AOISystemImpl extends BaseAOISystem {
 
@@ -19,6 +20,11 @@ public class AOISystemImpl extends BaseAOISystem {
     private final Map<Integer, Map<Integer, GridCell>> grid = new ConcurrentHashMap<>();
     @Getter
     private final Map<Integer, Player> playerMap = new ConcurrentHashMap<>();
+
+    @Override
+    public List<Player> getPlayers() {
+        return new CopyOnWriteArrayList<>(playerMap.values());
+    }
 
     public AOISystemImpl(int gridSize, int cellSize) {
         this.gridSize = gridSize;

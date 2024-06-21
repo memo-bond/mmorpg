@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.awt.Color;
 
+import static bond.memo.mmorpg.constants.Constants.RADIUS;
+
 @Slf4j
 public class JoinHandler extends BaseHandler<PlayerActions.Join> implements Handler {
 
@@ -33,6 +35,7 @@ public class JoinHandler extends BaseHandler<PlayerActions.Join> implements Hand
                     .direction(200)
                     .color(Color.BLACK)
                     .main(Boolean.TRUE)
+                    .radius(RADIUS)
                     .build();
 
             aoiSystem.addPlayer(mainPlayer);

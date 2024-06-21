@@ -3,7 +3,6 @@ package bond.memo.mmorpg.visualizer;
 import bond.memo.mmorpg.client.WebSocketClient;
 import bond.memo.mmorpg.config.adapter.KeyListenerAdapter;
 import bond.memo.mmorpg.config.adapter.MouseListenerAdapter;
-import bond.memo.mmorpg.models.PlayerActions;
 import bond.memo.mmorpg.service.AOISystem;
 import bond.memo.mmorpg.service.aoi.GridCell;
 import bond.memo.mmorpg.model.Player;
@@ -18,16 +17,13 @@ import javax.swing.Timer;
 import javax.swing.WindowConstants;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
 
 import static bond.memo.mmorpg.constants.Constants.RADIUS;
 
@@ -47,9 +43,10 @@ public class AOIVisualizer extends JPanel {
     public AOIVisualizer(AOISystem aoiSystem, Player mainPlayer) {
         this.gridSize = aoiSystem.getGridSize();
         this.cellSize = aoiSystem.getCellSize();
+        log.info("Cell size {}", cellSize);
         this.aoiSystem = aoiSystem;
         this.mainPlayer = mainPlayer;
-        this.players = new CopyOnWriteArrayList<>(aoiSystem.getPlayerMap().values());
+        this.players = aoiSystem.getPlayers();
         this.client = WebSocketClient.of();
         this.joinServerHandler = new JoinServerHandler(this.client, new ConcurrentLinkedQueue<>());
         this.playerMoveHandler = new PlayerMoveHandler(this.client, new ConcurrentLinkedQueue<>());
@@ -222,6 +219,7 @@ public class AOIVisualizer extends JPanel {
     private void drawGrid(Graphics g) {
         int numCells = gridSize / cellSize;
         g.setColor(Color.BLACK);
+        FontMetrics metrics = g.getFontMetrics(); // To measure the width and height of the text
 
         for (int i = 0; i <= numCells; i++) {
             int pos = i * cellSize;
@@ -230,76 +228,20 @@ public class AOIVisualizer extends JPanel {
             // Draw horizontal lines
             g.drawLine(0, pos, gridSize, pos);
         }
-    }
 
-    static class JoinServerHandler implements Runnable {
+        g.setColor(Color.RED); // Change the color to make the text visible
 
-        private final WebSocketClient client;
-        private final Queue<Player> queue;
-        private volatile boolean running = true;
-
-        public JoinServerHandler(WebSocketClient client, Queue<Player> queue) {
-            this.client = client;
-            this.queue = queue;
-        }
-
-        public void addQueuePlayer(Player player) {
-            this.queue.add(player);
-        }
-
-        public void stop() {
-            this.running = false;
-        }
-
-        @Override
-        public void run() {
-            LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(1));
-            while (running) {
-                while (!queue.isEmpty() && client != null) {
-                    Player p = queue.poll();
-                    log.info("JoinServer player join {}", p);
-                    if (p != null)
-                        client.send(p.joinMsgBytes());
-                    LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(10));
-                }
-                LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
+        for (int x = 0; x < numCells; x++) {
+            for (int y = 0; y < numCells; y++) {
+                String text = x * cellSize + "," + y * cellSize;
+                int textHeight = metrics.getHeight();
+                int xPosition = x * cellSize + 2; // Add a small offset for padding
+                int yPosition = y * cellSize + textHeight;
+                g.drawString(text, xPosition, yPosition);
             }
         }
     }
 
-    static class PlayerMoveHandler implements Runnable {
-
-        private final WebSocketClient client;
-        private final Queue<PlayerActions.PlayerMessage> queue;
-        private volatile boolean running = true;
-
-        public PlayerMoveHandler(WebSocketClient client, Queue<PlayerActions.PlayerMessage> queue) {
-            this.client = client;
-            this.queue = queue;
-        }
-
-        public void move(PlayerActions.PlayerMessage move) {
-            this.queue.add(move);
-        }
-
-        public void stop() {
-            this.running = false;
-        }
-
-        @Override
-        public void run() {
-            LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(1));
-            while (running) {
-                while (!queue.isEmpty() && client != null) {
-                    PlayerActions.PlayerMessage move = queue.poll();
-                    if (move != null)
-                        client.send(move.toByteArray());
-                    LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(2));
-                }
-                LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
-            }
-        }
-    }
 }
 
 

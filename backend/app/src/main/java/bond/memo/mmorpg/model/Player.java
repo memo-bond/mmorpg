@@ -70,6 +70,11 @@ public class Player {
         position.y = y;
     }
 
+    public boolean isMain() {
+        return id > 0 && id < 100 // temp condition for condition from Unity instead of GUI
+                && main;
+    }
+
     public boolean isCollision(Player otherPlayer) {
         if (id == otherPlayer.getId()) return false;
         float dx = position.getX() - otherPlayer.getPosition().getX();
