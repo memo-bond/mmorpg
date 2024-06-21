@@ -11,6 +11,9 @@ built
 models/gen
 backend/.idea
 FirstRPG/Library
+FirstRPG/HostUnityServer
+FirstRPG/Build
+FirstRPG/build_log.txt
 .DS_Store
 FirstRPG/.DS_Store
 FirstRPG/Assets/.DS_Store
