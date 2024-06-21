@@ -42,7 +42,6 @@ public class WebSocketClient
 
     private void OnMessage(byte[] bytes)
     {
-        Debug.Log("OnMessage!");
         Debug.Log(bytes);
 
         // getting the message as a string
@@ -58,10 +57,5 @@ public class WebSocketClient
     public WebSocketState State()
     {
         return websocket.State;
-    }
-
-    public void DispatchMessageQueue()
-    {
-        websocket.DispatchMessageQueue();
     }
 }

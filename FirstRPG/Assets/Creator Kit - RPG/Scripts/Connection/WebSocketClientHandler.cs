@@ -18,7 +18,7 @@ namespace Creator_Kit___RPG.Scripts.Connection
         private async void Start()
         {
             Debug.Log("Start Connect To Server");
-            _webSocket = new WebSocket("ws://localhost:6666/ws");
+            _webSocket = new WebSocket("ws://localhost/ws");
 
             _webSocket.OnMessage += (bytes) =>
             {
@@ -75,7 +75,7 @@ namespace Creator_Kit___RPG.Scripts.Connection
                     msg.WriteTo(stream);
                     bytes = stream.ToArray();
                 }
-
+                Debug.Log("Send Msg To Server");
                 await _webSocket.Send(bytes);
             }
         }

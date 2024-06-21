@@ -84,24 +84,26 @@ namespace RPGM.Gameplay
 
             if (online && main)
             {
+                Debug.Log("Waiting For Connect To Server");
                 while (client.State() != WebSocketState.Open)
                 {
                     await Task.Delay(10);
                 }
                 Debug.Log("Joining To Server");
+                id = Random.Range(1, 99);
                 PlayerMessage msg = new()
                 {
                     Join = new()
                     {
-                        Id = 1,
+                        Id = id,
                         Name = "Lucas",
                         X = transform.position.x,
                         Y = transform.position.y
                     }
                 };
                 
+                Debug.Log($"Player Join {msg}");
                 await client.Send(msg);
-                Debug.Log("await client.Send(msg);");
             }
         }
 
@@ -133,11 +135,13 @@ namespace RPGM.Gameplay
             {
                 Move = new()
                 {
-                    Id = 1,
+                    Id = id,
                     X = transform.position.x,
-                    Y = transform.position.y
+                    Y = -transform.position.y
                 }
             };
+            
+            Debug.Log($"Player Move {msg}");
             _ = client.Send(msg);
             lastPosition = transform.position;
         }
@@ -185,7 +189,7 @@ namespace RPGM.Gameplay
             {
                 Quit = new()
                 {
-                    Id = 1
+                    Id = id
                 }
             };
             await client.Send(msg);

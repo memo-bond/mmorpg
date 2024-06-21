@@ -36,7 +36,6 @@ namespace Creator_Kit___RPG.Scripts.Connection
 
         private void HandleServerMessage(byte[] data)
         {
-            Debug.Log($"Data length {data.Length} ");
             var msg = PlayerMessage.Parser.ParseFrom(data);
             switch (msg.ActionCase)
             {
@@ -66,7 +65,7 @@ namespace Creator_Kit___RPG.Scripts.Connection
 
         private void HandleResponseMessage(Response msg)
         {
-            Debug.Log($"Response From Server: {msg}");
+            // Debug.Log($"Response From Server: {msg}");
         }
 
         private void HandleJoinMessage(Join join)
