@@ -16,7 +16,7 @@ COPY settings.gradle settings.gradle
 RUN chmod +x gradlew
   
   # Build the application
-RUN ./gradlew build
+RUN gradle clean build
   
   # Use an official OpenJDK image to run the app
 FROM openjdk:21-jdk-slim
@@ -25,7 +25,7 @@ FROM openjdk:21-jdk-slim
 WORKDIR /app
   
   # Copy the built JAR file from the build stage
-COPY --from=build /home/gradle/project/build/libs/*.jar mmorpg-game-server.jar
+COPY --from=build /home/gradle/project/app/build/libs/*.jar mmorpg-game-server.jar
   
   # Expose the port your app runs on
 EXPOSE 80
