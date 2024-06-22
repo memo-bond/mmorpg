@@ -31,4 +31,4 @@ COPY --from=build /home/gradle/project/app/build/libs/*.jar mmorpg-game-server.j
 EXPOSE 80
   
   # Set the entry point for the container
-ENTRYPOINT ["java", "-jar", "mmorpg-game-server.jar"]
+ENTRYPOINT ["java", "-jar", "mmorpg-game-server.jar", "prod"]
