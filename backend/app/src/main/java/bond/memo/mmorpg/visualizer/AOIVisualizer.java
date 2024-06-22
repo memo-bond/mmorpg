@@ -32,7 +32,6 @@ public class AOIVisualizer extends JPanel {
 
     private final int gridSize;
     private final int cellSize;
-    private final transient WebSocketClient client;
     private final transient JoinServerHandler joinServerHandler;
     private final transient PlayerMoveHandler playerMoveHandler;
     private final transient AOISystem aoiSystem;
@@ -43,13 +42,13 @@ public class AOIVisualizer extends JPanel {
     public AOIVisualizer(AOISystem aoiSystem, Player mainPlayer) {
         this.gridSize = aoiSystem.getGridSize();
         this.cellSize = aoiSystem.getCellSize();
-        log.info("Cell size {}", cellSize);
         this.aoiSystem = aoiSystem;
         this.mainPlayer = mainPlayer;
         this.players = aoiSystem.getPlayers();
-        this.client = WebSocketClient.of();
-        this.joinServerHandler = new JoinServerHandler(this.client, new ConcurrentLinkedQueue<>());
-        this.playerMoveHandler = new PlayerMoveHandler(this.client, new ConcurrentLinkedQueue<>());
+
+        WebSocketClient client = WebSocketClient.of();
+        this.joinServerHandler = new JoinServerHandler(client, new ConcurrentLinkedQueue<>());
+        this.playerMoveHandler = new PlayerMoveHandler(client, new ConcurrentLinkedQueue<>());
         new Thread(joinServerHandler).start();
         new Thread(playerMoveHandler).start();
 
@@ -77,6 +76,8 @@ public class AOIVisualizer extends JPanel {
         // Add example players
         Player p1 = PlayerService.nextPlayer();
         Player p2 = PlayerService.nextPlayer();
+        p1.setSpeed(50);
+        p2.setSpeed(100);
         log.info("Player 1 {}", p1);
         log.info("Player 2 {}", p2);
         aoiSystem.addPlayer(p1);
@@ -219,7 +220,8 @@ public class AOIVisualizer extends JPanel {
     private void drawGrid(Graphics g) {
         int numCells = gridSize / cellSize;
         g.setColor(Color.BLACK);
-        FontMetrics metrics = g.getFontMetrics(); // To measure the width and height of the text
+
+//        FontMetrics metrics = g.getFontMetrics(); // To measure the width and height of the text
 
         for (int i = 0; i <= numCells; i++) {
             int pos = i * cellSize;
@@ -229,8 +231,11 @@ public class AOIVisualizer extends JPanel {
             g.drawLine(0, pos, gridSize, pos);
         }
 
-        g.setColor(Color.RED); // Change the color to make the text visible
+//        addTextGridCorner(g, numCells, metrics);
+    }
 
+    private void addTextGridCorner(Graphics g, int numCells, FontMetrics metrics) {
+        g.setColor(Color.RED); // Change the color to make the text visible
         for (int x = 0; x < numCells; x++) {
             for (int y = 0; y < numCells; y++) {
                 String text = x * cellSize + "," + y * cellSize;

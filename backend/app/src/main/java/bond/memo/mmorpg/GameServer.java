@@ -3,6 +3,7 @@
  */
 package bond.memo.mmorpg;
 
+import bond.memo.mmorpg.config.AppConfig;
 import bond.memo.mmorpg.handler.HttpServerHandler;
 import bond.memo.mmorpg.module.AutoServiceModule;
 import bond.memo.mmorpg.module.GameModule;
@@ -27,8 +28,6 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import lombok.extern.slf4j.Slf4j;
 
-import static bond.memo.mmorpg.constants.Constants.SERVER_PORT;
-
 @Slf4j
 public class GameServer {
 
@@ -42,7 +41,6 @@ public class GameServer {
     }
 
     public void start() throws InterruptedException {
-
         try (EventLoopGroup bossGroup = new NioEventLoopGroup();
              EventLoopGroup workerGroup = new NioEventLoopGroup()) {
             ServerBootstrap b = new ServerBootstrap();
@@ -56,6 +54,7 @@ public class GameServer {
             ChannelFuture f = b.bind(port).sync();
             f.channel().closeFuture().sync();
         }
+        log.info("Server started on port {}", port);
     }
 
     private ChannelInitializer<SocketChannel> serverInitializer() {
@@ -64,7 +63,6 @@ public class GameServer {
             @Override
             protected void initChannel(SocketChannel ch) {
                 ChannelPipeline pipeline = ch.pipeline();
-
                 // Setup Websocket
                 pipeline.addLast(new HttpServerCodec());
                 pipeline.addLast(HttpServerHandler.from(aoiSystem));
@@ -76,10 +74,16 @@ public class GameServer {
     }
 
     public static void main(String[] args) {
+        String profile = "dev"; // default profile
+        if(args.length > 0) {
+            profile = args[0];
+        }
         try {
-            log.info("Server started on port {}", SERVER_PORT);
-            Injector injector = Guice.createInjector(AutoServiceModule.of(), GameModule.of());
-            injector.getInstance(AOIVisualizer.class).startGui();
+            Injector injector = Guice.createInjector(AutoServiceModule.of(), GameModule.from(profile));
+            AppConfig config = injector.getInstance(AppConfig.class);
+            log.info("Server port {}", config.serverPort());
+            if(config.showUI())
+                injector.getInstance(AOIVisualizer.class).startGui();
             injector.getInstance(GameServer.class).start();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

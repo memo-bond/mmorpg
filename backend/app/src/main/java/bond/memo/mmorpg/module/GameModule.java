@@ -1,6 +1,8 @@
 package bond.memo.mmorpg.module;
 
 import bond.memo.mmorpg.GameServer;
+import bond.memo.mmorpg.config.AppConfig;
+import bond.memo.mmorpg.exception.LoadAppConfigException;
 import bond.memo.mmorpg.service.AOISystem;
 import bond.memo.mmorpg.service.aoi.AOISystemImpl;
 import bond.memo.mmorpg.model.Player;
@@ -8,30 +10,52 @@ import bond.memo.mmorpg.visualizer.AOIVisualizer;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import lombok.extern.slf4j.Slf4j;
+import org.yaml.snakeyaml.Yaml;
 
 import java.awt.Color;
+import java.io.InputStream;
 
 import static bond.memo.mmorpg.constants.Constants.CELL_SIZE;
 import static bond.memo.mmorpg.constants.Constants.GRID_SIZE;
 import static bond.memo.mmorpg.constants.Constants.RADIUS;
-import static bond.memo.mmorpg.constants.Constants.SERVER_PORT;
 
+@Slf4j
 public class GameModule extends AbstractModule {
 
-    private static final GameModule INSTANCE = new GameModule();
+    public static final String APP_CONFIG_PATH = "application_%s.yml";
 
-    public static GameModule of() {
-        return INSTANCE;
+    private String profile;
+
+    public GameModule(String profile) {
+        this.profile = profile;
+    }
+
+    public static GameModule from(String profile) {
+        return new GameModule(profile);
     }
 
     @Override
     protected void configure() {
     }
 
+
+    @Provides
+    private AppConfig provideAppConfig() {
+        Yaml yaml = new Yaml();
+        log.info("Yaml loader is loading application config from `{}` profile to AppConfig", profile);
+        String path = String.format(APP_CONFIG_PATH, profile);
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(path)) {
+            return yaml.loadAs(inputStream, AppConfig.class);
+        } catch (Exception e) {
+            throw new LoadAppConfigException("Failed to load configuration", e);
+        }
+    }
+
     @Provides
     @Singleton
-    private GameServer provideGameServer(AOISystem aoiSystem) {
-        return new GameServer(SERVER_PORT, aoiSystem);
+    private GameServer provideGameServer(AOISystem aoiSystem, AppConfig config) {
+        return new GameServer(config.getServer().getPort(), aoiSystem);
     }
 
     @Provides
