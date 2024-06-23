@@ -76,9 +76,9 @@ public class GameModule extends AbstractModule {
 
     @Provides
     @Singleton
-    private AOIVisualizer provideAOIVisualizer(AOISystem aoiSystem, Player mainPlayer) {
+    private AOIVisualizer provideAOIVisualizer(AOISystem aoiSystem, Player mainPlayer, AppConfig config) {
         aoiSystem.addPlayer(mainPlayer);
-        return new AOIVisualizer(aoiSystem, mainPlayer);
+        return new AOIVisualizer(aoiSystem, mainPlayer, config.serverHost());
     }
 }
 

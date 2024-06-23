@@ -1,6 +1,5 @@
 package bond.memo.mmorpg.client;
 
-import bond.memo.mmorpg.models.PlayerActions;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,15 +16,13 @@ import java.util.concurrent.locks.LockSupport;
 @Slf4j
 public class WebSocketClient {
 
-    private  static final String SERVER_HOST = "ws://127.0.0.1/ws";
-
     private WebSocketListener webSocketListener;
 
     @Getter
     private WebSocket websocket;
 
-    public static WebSocketClient of() {
-        return new WebSocketClient();
+    public static WebSocketClient from(String serverHost) {
+        return new WebSocketClient(serverHost);
     }
 
     public boolean isConnected() {
@@ -37,7 +34,7 @@ public class WebSocketClient {
         websocket.sendBinary(ByteBuffer.wrap(data), true);
     }
 
-    private WebSocketClient() {
+    private WebSocketClient(String serverHost) {
         new Thread(() -> {
             webSocketListener = new WebSocketListener();
 
@@ -45,7 +42,7 @@ public class WebSocketClient {
                 log.info("wait 500ms for server started");
                 LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500));
                 websocket = client.newWebSocketBuilder()
-                        .buildAsync(URI.create(SERVER_HOST), webSocketListener).join();
+                        .buildAsync(URI.create(serverHost), webSocketListener).join();
             } catch (Exception e) {
                 log.error("Websocket client error due to ", e);
             }

@@ -41,6 +41,10 @@ public class AppConfig {
         return game.getConfig().isShowUI();
     }
 
+    public String serverHost() {
+        return game.getConfig().getServerHost();
+    }
+
     @Data
     public static class ServerConfig {
         private int port;
@@ -60,6 +64,7 @@ public class AppConfig {
             private int gridSize;
             private float radius;
             private boolean showUI;
+            private String serverHost;
         }
     }
 }

@@ -42,7 +42,7 @@ public class ClientTest {
                         }
                     });
 
-            ChannelFuture f = b.connect("localhost", 6666).sync();
+            ChannelFuture f = b.connect("ws.memo.bond", 443).sync();
             Channel channel = f.channel();
 
             channel.writeAndFlush(message).addListener((ChannelFutureListener) future -> {

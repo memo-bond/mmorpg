@@ -4,6 +4,7 @@ game:
     gridSize: 1000
     radius: 50
     showUI: false
+    serverHost: wss://ws.memo.bond
 server:
   port: 80
 datasource:

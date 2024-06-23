@@ -1,5 +1,6 @@
 package bond.memo.mmorpg.handler;
 
+import bond.memo.mmorpg.model.Player;
 import bond.memo.mmorpg.models.PlayerActions;
 import bond.memo.mmorpg.service.AOISystem;
 import io.netty.channel.ChannelHandlerContext;
@@ -19,8 +20,11 @@ public class MoveHandler extends BaseHandler<PlayerActions.Move> implements Hand
     @Override
     public void handle(ChannelHandlerContext ctx) {
         if (msg instanceof PlayerActions.Move move) {
-//            log.info("MOVE action player ID {}, x `{}`, y `{}`", move.getId(), move.getX(), move.getY());
-            aoiSystem.getPlayerById(move.getId()).move(move.getX(), move.getY());
+            Player player = aoiSystem.getPlayerById(move.getId());
+            if (player != null && player.isMain()) {
+                log.info("MOVE action player ID {}, x `{}`, y `{}`", move.getId(), move.getX(), move.getY());
+            }
+            player.move(move.getX(), move.getY());
             response(ctx);
         }
     }

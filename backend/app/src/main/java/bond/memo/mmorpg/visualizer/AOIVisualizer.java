@@ -39,14 +39,14 @@ public class AOIVisualizer extends JPanel {
     private final transient List<Player> players;
 
     @Inject
-    public AOIVisualizer(AOISystem aoiSystem, Player mainPlayer) {
+    public AOIVisualizer(AOISystem aoiSystem, Player mainPlayer, String serverHost) {
         this.gridSize = aoiSystem.getGridSize();
         this.cellSize = aoiSystem.getCellSize();
         this.aoiSystem = aoiSystem;
         this.mainPlayer = mainPlayer;
         this.players = aoiSystem.getPlayers();
 
-        WebSocketClient client = WebSocketClient.of();
+        WebSocketClient client = WebSocketClient.from(serverHost);
         this.joinServerHandler = new JoinServerHandler(client, new ConcurrentLinkedQueue<>());
         this.playerMoveHandler = new PlayerMoveHandler(client, new ConcurrentLinkedQueue<>());
         new Thread(joinServerHandler).start();
