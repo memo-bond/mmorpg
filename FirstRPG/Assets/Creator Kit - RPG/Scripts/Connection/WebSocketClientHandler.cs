@@ -11,15 +11,21 @@ namespace Creator_Kit___RPG.Scripts.Connection
 {
     public class WebSocketClientHandler : MonoBehaviour
     {
+        [SerializeField] private bool local;
         public event Action<byte[]> OnMessageReceived;
         private WebSocket _webSocket;
         private readonly Dictionary<int, CharacterController2D> _players = new();
-
+        
         private async void Start()
         {
-            Debug.Log("Start Connect To Server");
-            _webSocket = new WebSocket("ws://localhost/ws");
-
+            try
+            {
+                _webSocket = local ? new WebSocket("ws://localhost/ws") : new WebSocket("wss://ws.memo.bond");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Could not create connect to server due to " + e.Message);
+            }
             _webSocket.OnMessage += (bytes) =>
             {
                 if (bytes != null)
@@ -75,7 +81,6 @@ namespace Creator_Kit___RPG.Scripts.Connection
                     msg.WriteTo(stream);
                     bytes = stream.ToArray();
                 }
-                Debug.Log("Send Msg To Server");
                 await _webSocket.Send(bytes);
             }
         }

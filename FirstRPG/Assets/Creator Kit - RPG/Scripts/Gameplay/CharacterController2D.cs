@@ -1,8 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections;
+using System.Threading.Tasks;
 using Creator_Kit___RPG.Scripts.Connection;
 using NativeWebSocket;
 using UnityEngine;
 using UnityEngine.U2D;
+using Random = UnityEngine.Random;
 
 namespace RPGM.Gameplay
 {
@@ -75,20 +78,16 @@ namespace RPGM.Gameplay
         private async void Start()
         {
             main = true;
-            await StartAsync();
+            StartAsync();
         }
 
-        private async Task StartAsync()
+        // private async Task StartAsync()
+        private void StartAsync()
         {
             lastPosition = transform.position;
 
             if (online && main)
             {
-                Debug.Log("Waiting For Connect To Server");
-                while (client.State() != WebSocketState.Open)
-                {
-                    await Task.Delay(10);
-                }
                 Debug.Log("Joining To Server");
                 id = Random.Range(1, 99);
                 PlayerMessage msg = new()
@@ -101,11 +100,35 @@ namespace RPGM.Gameplay
                         Y = transform.position.y
                     }
                 };
-                
-                Debug.Log($"Player Join {msg}");
-                await client.Send(msg);
+                StartCoroutine(SendJoinMsg(msg));
             }
         }
+
+        private IEnumerator SendJoinMsg(PlayerMessage msg)
+        {
+            Debug.Log("Start send join msg");
+    
+            float timeout = 10f; // Timeout after 10 seconds
+            float elapsedTime = 0f;
+
+            while (client.State() != WebSocketState.Open && elapsedTime < timeout)
+            {
+                Debug.Log("Check State " + client.State());
+                yield return new WaitForSeconds(0.3f);
+                elapsedTime += 0.3f;
+            }
+
+            if (client.State() == WebSocketState.Open)
+            {
+                Debug.Log("Send Join Msg To Server " + msg);
+                _ = client.Send(msg);
+            }
+            else
+            {
+                Debug.LogError("WebSocket connection failed to open within timeout period.");
+            }
+        }
+
 
         private void IdleState()
         {
@@ -131,6 +154,12 @@ namespace RPGM.Gameplay
             if (!online) return; // guard
             if (!(Vector3.Distance(transform.position, lastPosition) > positionUpdateThreshold)) return; // guard
             
+            sendMoveMsg();
+            lastPosition = transform.position;
+        }
+
+        private void sendMoveMsg()
+        {
             PlayerMessage msg = new()
             {
                 Move = new()
@@ -143,7 +172,6 @@ namespace RPGM.Gameplay
             
             Debug.Log($"Player Move {msg}");
             _ = client.Send(msg);
-            lastPosition = transform.position;
         }
 
         private void UpdateAnimator(Vector3 direction)
