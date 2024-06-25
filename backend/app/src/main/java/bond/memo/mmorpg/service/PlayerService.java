@@ -12,4 +12,6 @@ public interface PlayerService extends Service {
         player.setColor(ColorUtil.getRandomColor());
         return player;
     }
+
+    void handlePlayerDisconnect(Player player);
 }

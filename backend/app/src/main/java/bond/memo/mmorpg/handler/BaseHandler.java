@@ -3,9 +3,9 @@ package bond.memo.mmorpg.handler;
 import bond.memo.mmorpg.models.PlayerActions;
 import bond.memo.mmorpg.service.AOISystem;
 import com.google.protobuf.GeneratedMessageLite;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+
+import static bond.memo.mmorpg.utils.ByteUtils.protoMsgToBytes;
 
 public abstract class BaseHandler <T extends GeneratedMessageLite> {
 
@@ -21,6 +21,6 @@ public abstract class BaseHandler <T extends GeneratedMessageLite> {
         PlayerActions.PlayerMessage responseMsg = PlayerActions.PlayerMessage.newBuilder()
                 .setResponse(PlayerActions.Response.newBuilder().setSuccess(Boolean.TRUE).build())
                 .build();
-        ctx.writeAndFlush(new BinaryWebSocketFrame(Unpooled.wrappedBuffer(responseMsg.toByteArray())));
+        ctx.writeAndFlush(protoMsgToBytes(responseMsg));
     }
 }

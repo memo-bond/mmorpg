@@ -18,7 +18,7 @@ public interface AOISystem {
 
     void removePlayer(int id);
 
-    List<Player> getPlayersInAOI(Player.Position position, float radius);
+    List<Player> getPlayersInAOI(Player player);
 
     Map<Integer, Map<Integer, GridCell>> getGrid();
 

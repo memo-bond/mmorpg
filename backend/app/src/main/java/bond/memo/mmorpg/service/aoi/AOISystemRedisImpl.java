@@ -68,26 +68,8 @@ public class AOISystemRedisImpl extends BaseAOISystem {
     }
 
     @Override
-    public List<Player> getPlayersInAOI(Player.Position position, float radius) {
-        int minCellX = getCellIndex(position.getX() - radius);
-        int maxCellX = getCellIndex(position.getX() + radius);
-        int minCellY = getCellIndex(position.getY() - radius);
-        int maxCellY = getCellIndex(position.getY() + radius);
-
-        List<Player> playersInAOI = new ArrayList<>();
-        for (int x = minCellX; x <= maxCellX; x++) {
-            for (int y = minCellY; y <= maxCellY; y++) {
-                String cellKey = GRID_CELL_KEY_PREFIX + x + ":" + y;
-                List<String> playerIds = jedis.lrange(cellKey, 0, -1);
-                for (String playerId : playerIds) {
-                    Player player = playerRepository.getPlayer(Integer.parseInt(playerId));
-                    if (player != null) {
-                        playersInAOI.add(player);
-                    }
-                }
-            }
-        }
-        return playersInAOI;
+    public List<Player> getPlayersInAOI(Player player) {
+        return null;
     }
 
     @Override

@@ -2,8 +2,10 @@ package bond.memo.mmorpg.random;
 
 import bond.memo.mmorpg.model.Player;
 import com.github.javafaker.Faker;
+import io.netty.channel.Channel;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
+import org.jeasy.random.randomizers.range.IntegerRangeRandomizer;
 
 import java.awt.Color;
 import java.util.Random;
@@ -26,6 +28,8 @@ public class MyRandomizer {
                 .randomize(field -> field.getName().equals("x"), new FloatRangeRandomizer(0.0f, 900.0f))
                 .randomize(field -> field.getName().equals("y"), new FloatRangeRandomizer(0.0f, 900.0f))
                 .randomize(field -> field.getName().equals("direction"), new FloatRangeRandomizer(0.0f, 360.0f))
+                .randomize(field -> field.getName().equals("id"), new IntegerRangeRandomizer(5000, Integer.MAX_VALUE))
+                .excludeField(named("channel").and(ofType(Channel.class)).and(inClass(Player.class)))
                 .excludeField(named("radius").and(ofType(Float.class)).and(inClass(Player.class)))
                 .excludeField(named("color").and(ofType(Color.class)).and(inClass(Player.class)));
         easyRandom = new EasyRandom(parameters);

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using Creator_Kit___RPG.Scripts.Connection;
 using NativeWebSocket;
 using UnityEngine;
@@ -14,11 +12,9 @@ namespace RPGM.Gameplay
     /// </summary>
     public class CharacterController2D : MonoBehaviour
     {
-        [SerializeField]
-        private bool online = false;
-        
-        [SerializeField]
-        private ConnectionManager client;
+        [SerializeField] private bool online = false;
+
+        [SerializeField] private ConnectionManager client;
 
         public float speed = 1;
         public float acceleration = 2;
@@ -31,11 +27,12 @@ namespace RPGM.Gameplay
         PixelPerfectCamera pixelPerfectCamera;
 
         private Vector3 lastPosition;
-        private float positionUpdateThreshold = 0.1f;
+        private float positionUpdateThreshold = 0.2f;
 
         enum State
         {
-            Idle, Moving
+            Idle,
+            Moving
         }
 
         State state = State.Idle;
@@ -46,17 +43,17 @@ namespace RPGM.Gameplay
         float velocity;
 
         private bool main;
-        private int id;
+        private uint id;
         private string name;
         private Vector3 position;
-        
+
         public bool Main
         {
             get { return main; }
             set { main = value; }
         }
-        
-        public int Id
+
+        public uint Id
         {
             get { return id; }
             set { id = value; }
@@ -73,23 +70,16 @@ namespace RPGM.Gameplay
             get { return position; }
             set { position = value; }
         }
-        
 
-        private async void Start()
+        private void Start()
         {
             main = true;
-            StartAsync();
-        }
-
-        // private async Task StartAsync()
-        private void StartAsync()
-        {
             lastPosition = transform.position;
 
             if (online && main)
             {
                 Debug.Log("Joining To Server");
-                id = Random.Range(1, 99);
+                id = (uint)Random.Range(1, 99);
                 PlayerMessage msg = new()
                 {
                     Join = new()
@@ -107,7 +97,7 @@ namespace RPGM.Gameplay
         private IEnumerator SendJoinMsg(PlayerMessage msg)
         {
             Debug.Log("Start send join msg");
-    
+
             float timeout = 10f; // Timeout after 10 seconds
             float elapsedTime = 0f;
 
@@ -148,17 +138,23 @@ namespace RPGM.Gameplay
         {
             velocity = Mathf.Clamp01(velocity + Time.deltaTime * acceleration);
             UpdateAnimator(nextMoveCommand);
-            rigidbody2D.velocity = Vector2.SmoothDamp(rigidbody2D.velocity, nextMoveCommand * speed, ref currentVelocity, acceleration, speed);
+            rigidbody2D.velocity = Vector2.SmoothDamp(rigidbody2D.velocity,
+                nextMoveCommand * speed, ref currentVelocity, acceleration, speed);
             spriteRenderer.flipX = rigidbody2D.velocity.x >= 0 ? true : false;
 
             if (!online) return; // guard
             if (!(Vector3.Distance(transform.position, lastPosition) > positionUpdateThreshold)) return; // guard
-            
-            sendMoveMsg();
+            if (!main)
+            {
+                nextMoveCommand = Vector3.zero;
+                return;
+            }
+            Debug.Log($"nextMoveCommand {nextMoveCommand}");
+            SendMoveMsg();
             lastPosition = transform.position;
         }
 
-        private void sendMoveMsg()
+        private void SendMoveMsg()
         {
             PlayerMessage msg = new()
             {
@@ -166,10 +162,10 @@ namespace RPGM.Gameplay
                 {
                     Id = id,
                     X = transform.position.x,
-                    Y = -transform.position.y
+                    Y = transform.position.y
                 }
             };
-            
+
             Debug.Log($"Player Move {msg}");
             _ = client.Send(msg);
         }

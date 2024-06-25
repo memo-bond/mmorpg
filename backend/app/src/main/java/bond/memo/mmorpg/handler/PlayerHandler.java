@@ -3,6 +3,7 @@ package bond.memo.mmorpg.handler;
 import bond.memo.mmorpg.exception.HandleBinaryDataException;
 import bond.memo.mmorpg.models.PlayerActions;
 import bond.memo.mmorpg.service.AOISystem;
+import bond.memo.mmorpg.service.PlayerService;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
@@ -20,13 +21,15 @@ import lombok.extern.slf4j.Slf4j;
 public class PlayerHandler extends ChannelInboundHandlerAdapter {
 
     private final AOISystem aoiSystem;
+    private final PlayerService playerService;
 
-    private PlayerHandler(AOISystem aoiSystem) {
+    private PlayerHandler(AOISystem aoiSystem, PlayerService playerService) {
         this.aoiSystem = aoiSystem;
+        this.playerService = playerService;
     }
 
-    public static PlayerHandler from(AOISystem aoiSystem) {
-        return new PlayerHandler(aoiSystem);
+    public static PlayerHandler from(AOISystem aoiSystem, PlayerService playerService) {
+        return new PlayerHandler(aoiSystem, playerService);
     }
 
     @Override
@@ -66,7 +69,7 @@ public class PlayerHandler extends ChannelInboundHandlerAdapter {
             switch (msg.getActionCase()) {
                 case JOIN -> JoinHandler.from(aoiSystem, msg.getJoin()).handle(ctx);
                 case MOVE -> MoveHandler.from(aoiSystem, msg.getMove()).handle(ctx);
-                case QUIT -> QuitHandler.from(aoiSystem, msg.getQuit()).handle(ctx);
+                case QUIT -> QuitHandler.from(aoiSystem, playerService, msg.getQuit()).handle(ctx);
                 case LEAVE -> LeaveHandler.from(aoiSystem, msg.getLeave()).handle(ctx);
                 case ACTION_NOT_SET -> log.error("ACTION_NOT_SET");
                 default -> log.error("Unknown action received: {}", msg.getActionCase());

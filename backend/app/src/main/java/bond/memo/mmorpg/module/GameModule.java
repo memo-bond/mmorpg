@@ -3,9 +3,11 @@ package bond.memo.mmorpg.module;
 import bond.memo.mmorpg.GameServer;
 import bond.memo.mmorpg.config.AppConfig;
 import bond.memo.mmorpg.exception.LoadAppConfigException;
-import bond.memo.mmorpg.service.AOISystem;
-import bond.memo.mmorpg.service.aoi.AOISystemImpl;
 import bond.memo.mmorpg.model.Player;
+import bond.memo.mmorpg.service.AOISystem;
+import bond.memo.mmorpg.service.PlayerService;
+import bond.memo.mmorpg.service.aoi.AOISystemImpl;
+import bond.memo.mmorpg.service.impl.PlayerServiceImpl;
 import bond.memo.mmorpg.visualizer.AOIVisualizer;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -54,8 +56,8 @@ public class GameModule extends AbstractModule {
 
     @Provides
     @Singleton
-    private GameServer provideGameServer(AOISystem aoiSystem, AppConfig config) {
-        return new GameServer(config.getServer().getPort(), aoiSystem);
+    private GameServer provideGameServer(AOISystem aoiSystem, AppConfig config, PlayerService playerService) {
+        return new GameServer(config.getServer().getPort(), aoiSystem, playerService);
     }
 
     @Provides
@@ -68,7 +70,7 @@ public class GameModule extends AbstractModule {
     @Singleton
     private Player provideMainPlayer() {
         return Player.builder()
-                .id(123456).name("Louis").position(Player.Position.from(200, 300))
+                .id(123456).name("Louis").position(Player.Position.from(430, 375))
                 .speed(200).radius(RADIUS).direction(200)
                 .color(Color.RED)
                 .build();
@@ -79,6 +81,12 @@ public class GameModule extends AbstractModule {
     private AOIVisualizer provideAOIVisualizer(AOISystem aoiSystem, Player mainPlayer, AppConfig config) {
         aoiSystem.addPlayer(mainPlayer);
         return new AOIVisualizer(aoiSystem, mainPlayer, config.serverHost());
+    }
+
+    @Provides
+    @Singleton
+    private PlayerService providePlayerService() {
+        return new PlayerServiceImpl();
     }
 }
 

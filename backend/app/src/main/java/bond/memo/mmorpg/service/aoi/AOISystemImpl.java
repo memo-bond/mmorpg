@@ -3,6 +3,7 @@ package bond.memo.mmorpg.service.aoi;
 
 import bond.memo.mmorpg.model.Player;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+@Slf4j
 public class AOISystemImpl extends BaseAOISystem {
 
     @Getter
@@ -32,10 +34,11 @@ public class AOISystemImpl extends BaseAOISystem {
     }
 
     public void addPlayer(Player player) {
-        int cellX = getCellIndex(player.getPosition().getX());
-        int cellY = getCellIndex(player.getPosition().getY());
-        grid.computeIfAbsent(cellX, k -> new ConcurrentHashMap<>())
-                .computeIfAbsent(cellY, k -> new GridCell())
+        int column = getCellIndex(player.getPosition().getX());
+        int row = getCellIndex(player.getPosition().getY());
+        log.info("Add player column `{}` row `{}`", column, row);
+        grid.computeIfAbsent(column, k -> new ConcurrentHashMap<>())
+                .computeIfAbsent(row, k -> new GridCell())
                 .getPlayers().add(player);
         playerMap.put(player.getId(), player);
     }
@@ -66,7 +69,9 @@ public class AOISystemImpl extends BaseAOISystem {
         playerMap.remove(player.getId()); // Remove player from the ID map
     }
 
-    public List<Player> getPlayersInAOI(Player.Position position, float radius) {
+    public List<Player> getPlayersInAOI(Player player) {
+        Player.Position position = player.getPosition();
+        float radius = player.getRadius();
         int minCellX = getCellIndex(position.getX() - radius);
         int maxCellX = getCellIndex(position.getX() + radius);
         int minCellY = getCellIndex(position.getY() - radius);
@@ -86,9 +91,9 @@ public class AOISystemImpl extends BaseAOISystem {
         }
         // Filter players within the exact radius
         List<Player> playersWithinRadius = new LinkedList<>();
-        for (Player player : entitiesInAOI) {
-            if (distance(position, player.getPosition()) <= radius) {
-                playersWithinRadius.add(player);
+        for (Player p : entitiesInAOI) {
+            if (distance(position, p.getPosition()) <= radius) {
+                playersWithinRadius.add(p);
             }
         }
 

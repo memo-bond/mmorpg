@@ -1,0 +1,1 @@
+protoc --csharp_out="../FirstRPG/Assets/Creator Kit - RPG/Scripts/Generated" player_actions.proto

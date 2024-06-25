@@ -1,13 +1,14 @@
 package bond.memo.mmorpg.model;
 
+import bond.memo.mmorpg.enums.MoveDirection;
 import bond.memo.mmorpg.models.PlayerActions;
 import bond.memo.mmorpg.utils.ColorUtil;
+import io.netty.channel.Channel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.awt.Color;
-import java.util.Random;
 
 @Slf4j
 @Data
@@ -22,12 +23,13 @@ public class Player {
     private float radius;
     private Color color;
     private boolean main;
-    private static final Random RANDOM = new Random();
+    private Channel channel;
 
     public Player() {
     }
 
-    public Player(int id, String name, Position position, float direction, float speed, float radius, Color color, boolean main) {
+    public Player(int id, String name, Position position, float direction,
+                  float speed, float radius, Color color, boolean main, Channel channel) {
         this.id = id;
         this.name = name;
         this.position = position;
@@ -36,26 +38,42 @@ public class Player {
         this.radius = radius;
         this.color = color == null ? ColorUtil.getRandomColor() : color;
         this.main = main;
-    }
-
-    public byte[] moveMsgBytes() {
-        return PlayerActions.PlayerMessage.newBuilder()
-                .setMove(PlayerActions.Move.newBuilder()
-                        .setId(id).setX(position.x).setY(position.y).build())
-                .build().toByteArray();
+        this.channel = channel;
     }
 
     public PlayerActions.PlayerMessage moveMsg() {
-        return PlayerActions.PlayerMessage.newBuilder()
-                .setMove(PlayerActions.Move.newBuilder()
-                        .setId(id).setX(position.x).setY(position.y).build())
+        var move = PlayerActions.Move.newBuilder()
+                .setId(id).setName(name).setX(position.x).setY(position.y)
+                .setDirection(calcDirection().ordinal())
                 .build();
+        var msg = PlayerActions.PlayerMessage.newBuilder()
+                .setMove(move)
+                .build();
+        log.info("Msg {}", move);
+        return msg;
+    }
+
+    public MoveDirection calcDirection() {
+        direction = direction % 360;
+        if (direction < 0) {
+            direction += 360;
+        }
+        // Determine the movement direction
+        if (direction >= 45 && direction < 135) {
+            return MoveDirection.UP;
+        } else if (direction >= 135 && direction < 225) {
+            return MoveDirection.LEFT;
+        } else if (direction >= 225 && direction < 315) {
+            return MoveDirection.DOWN;
+        } else {
+            return MoveDirection.RIGHT;
+        }
     }
 
     public byte[] joinMsgBytes() {
         return PlayerActions.PlayerMessage.newBuilder()
                 .setJoin(PlayerActions.Join.newBuilder()
-                        .setId(id).setX(position.x).setY(position.y).build())
+                        .setId(id).setName(name).setX(position.x).setY(position.y).build())
                 .build().toByteArray();
     }
 
@@ -81,8 +99,8 @@ public class Player {
         float dy = position.getY() - otherPlayer.getPosition().getY();
         float distance = (float) Math.sqrt(dx * dx + dy * dy);
         boolean collided = distance <= radius + otherPlayer.getRadius();
-        if (collided)
-            log.info("Player ID `{}` name `{}` collided with player ID `{}` name `{}`", id, name, otherPlayer.getId(), otherPlayer.getName());
+//        if (collided)
+//            log.info("Player ID `{}` name `{}` collided with player ID `{}` name `{}`", id, name, otherPlayer.getId(), otherPlayer.getName());
         return collided;
     }
 
@@ -121,5 +139,19 @@ public class Player {
             this.x = x;
             this.y = y;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Player player = (Player) o;
+        return id == player.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
     }
 }

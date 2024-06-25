@@ -5,9 +5,9 @@ package bond.memo.mmorpg;
 
 import bond.memo.mmorpg.config.AppConfig;
 import bond.memo.mmorpg.handler.HttpServerHandler;
-import bond.memo.mmorpg.module.AutoServiceModule;
 import bond.memo.mmorpg.module.GameModule;
 import bond.memo.mmorpg.service.AOISystem;
+import bond.memo.mmorpg.service.PlayerService;
 import bond.memo.mmorpg.visualizer.AOIVisualizer;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -32,12 +32,14 @@ import lombok.extern.slf4j.Slf4j;
 public class GameServer {
 
     private final int port;
+    private final PlayerService playerService;
     private final AOISystem aoiSystem;
 
     @Inject
-    public GameServer(int port, AOISystem aoiSystem) {
+    public GameServer(int port, AOISystem aoiSystem, PlayerService playerService) {
         this.port = port;
         this.aoiSystem = aoiSystem;
+        this.playerService = playerService;
     }
 
     public void start() throws InterruptedException {
@@ -65,7 +67,7 @@ public class GameServer {
                 ChannelPipeline pipeline = ch.pipeline();
                 // Setup Websocket
                 pipeline.addLast(new HttpServerCodec());
-                pipeline.addLast(HttpServerHandler.from(aoiSystem));
+                pipeline.addLast(HttpServerHandler.from(aoiSystem, playerService));
                 pipeline.addLast(new HttpObjectAggregator(65536));
                 pipeline.addLast(new ChunkedWriteHandler());
                 pipeline.addLast(new WebSocketServerProtocolHandler("/ws"));
@@ -79,7 +81,7 @@ public class GameServer {
             profile = args[0];
         }
         try {
-            Injector injector = Guice.createInjector(AutoServiceModule.of(), GameModule.from(profile));
+            Injector injector = Guice.createInjector(GameModule.from(profile));
             AppConfig config = injector.getInstance(AppConfig.class);
             log.info("Server port {}", config.serverPort());
             if(config.showUI())

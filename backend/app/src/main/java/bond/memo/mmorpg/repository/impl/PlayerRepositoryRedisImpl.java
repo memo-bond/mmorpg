@@ -27,17 +27,18 @@ public class PlayerRepositoryRedisImpl implements PlayerRepository {
     }
 
     public Player getPlayer(int id) {
-        String playerId = String.valueOf(id);
-        String name = jedis.hget("player:" + playerId, "name");
-        float positionX = Float.parseFloat(jedis.hget("player:" + playerId, "position_x"));
-        float positionY = Float.parseFloat(jedis.hget("player:" + playerId, "position_y"));
-        float direction = Float.parseFloat(jedis.hget("player:" + playerId, "direction"));
-        float speed = Float.parseFloat(jedis.hget("player:" + playerId, "speed"));
-        float radius = Float.parseFloat(jedis.hget("player:" + playerId, "radius"));
-        int colorRGB = Integer.parseInt(jedis.hget("player:" + playerId, "color"));
-        Color color = new Color(colorRGB);
-
-        return new Player(id, name, Player.Position.from(positionX, positionY), speed, radius, direction, color, Boolean.FALSE);
+//        String playerId = String.valueOf(id);
+//        String name = jedis.hget("player:" + playerId, "name");
+//        float positionX = Float.parseFloat(jedis.hget("player:" + playerId, "position_x"));
+//        float positionY = Float.parseFloat(jedis.hget("player:" + playerId, "position_y"));
+//        float direction = Float.parseFloat(jedis.hget("player:" + playerId, "direction"));
+//        float speed = Float.parseFloat(jedis.hget("player:" + playerId, "speed"));
+//        float radius = Float.parseFloat(jedis.hget("player:" + playerId, "radius"));
+//        int colorRGB = Integer.parseInt(jedis.hget("player:" + playerId, "color"));
+//        Color color = new Color(colorRGB);
+//
+//        return new Player(id, name, Player.Position.from(positionX, positionY), speed, radius, direction, color, Boolean.FALSE);
+        return null;
     }
 
     public void close() {

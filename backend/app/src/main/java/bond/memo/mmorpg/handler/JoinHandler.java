@@ -24,22 +24,19 @@ public class JoinHandler extends BaseHandler<PlayerActions.Join> implements Hand
     @Override
     public void handle(ChannelHandlerContext ctx) {
         if (msg instanceof PlayerActions.Join join) {
-            log.info("JOIN action player ID `{}`, name `{}`, x `{}`, y `{}`",
-                    join.getId(), join.getName(), join.getX(), join.getY());
-
-            Player mainPlayer = Player.builder()
+            Player player = Player.builder()
                     .id(join.getId())
                     .name(join.getName())
                     .position(Player.Position.from(join.getX(), join.getY()))
-                    .speed(1000)
+                    .speed(100)
                     .direction(200)
                     .color(Color.BLACK)
                     .main(Boolean.TRUE)
                     .radius(RADIUS)
+                    .channel(ctx.channel())
                     .build();
-
-            aoiSystem.addPlayer(mainPlayer);
-
+            log.info("Player join server `{}`", player);
+            aoiSystem.addPlayer(player);
             response(ctx);
         }
     }

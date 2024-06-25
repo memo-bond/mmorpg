@@ -2,44 +2,66 @@ using System.Collections.Generic;
 using RPGM.Gameplay;
 using UnityEngine;
 
-public class PlayerManager : MonoBehaviour
+namespace Creator_Kit___RPG.Scripts.PlayerManager
 {
-    [SerializeField]
-    private GameObject playerPrefab;
-    private readonly Dictionary<int, CharacterController2D> players = new();
-
-    public void AddPlayer(int id, string name, Vector3 position, bool isLocalPlayer = false)
+    public class PlayerManager : MonoBehaviour
     {
-        if (players.ContainsKey(id))
+        [SerializeField] private GameObject playerPrefab;
+        private readonly Dictionary<uint, CharacterController2D> players = new();
+
+        public bool AddPlayer(Move move)
         {
-            Debug.LogWarning("Player with this ID already exists!");
-            return;
+            if (players.ContainsKey(move.Id))
+            {
+                Debug.LogWarning("Player with this ID already exists!");
+                return false;
+            }
+
+            Debug.Log($"Init new player ID `{move.Id}` in our world");
+            var position = new Vector3(move.X, move.Y, 0);
+            var playerController = Instantiate(playerPrefab, position, Quaternion.identity);
+            var player = playerController.GetComponent<CharacterController2D>();
+
+            player.Id = move.Id;
+            player.Name = move.Name;
+            player.Position = position;
+            player.Main = false;
+
+            players.Add(move.Id, player);
+            return true;
         }
 
-        var player = Instantiate(playerPrefab, position, Quaternion.identity);
-        var controller = player.GetComponent<CharacterController2D>();
-
-        controller.Id = id;
-        controller.Name = name;
-        controller.Position = position;
-
-        players.Add(id, controller);
-    }
-
-    public void UpdatePlayerPosition(int id, Vector3 position)
-    {
-        if (players.TryGetValue(id, out CharacterController2D controller))
+        public void UpdatePlayerPosition(Move move)
         {
-            controller.transform.position = position;
+            if (players.TryGetValue(move.Id, out CharacterController2D player))
+            {
+                player.transform.position = new Vector3(move.X, move.Y, 0);
+                Debug.Log($"move.Direction {move.Direction}");
+                switch (move.Direction)
+                {
+                    case 0:
+                        player.nextMoveCommand = new Vector3(0.1f, 0, 0);
+                        break;
+                    case 1:
+                        player.nextMoveCommand = new Vector3(-0.1f, 0, 0);
+                        break;
+                    case 2:
+                        player.nextMoveCommand = new Vector3(0, 0.1f, 0);
+                        break;
+                    case 3:
+                        player.nextMoveCommand = new Vector3(0, -0.1f, 0);
+                        break;
+                }
+            }
         }
-    }
 
-    public void RemovePlayer(int id)
-    {
-        if (players.TryGetValue(id, out CharacterController2D controller))
+        public void RemovePlayer(uint id)
         {
-            Destroy(controller.gameObject);
-            players.Remove(id);
+            if (players.TryGetValue(id, out CharacterController2D controller))
+            {
+                Destroy(controller.gameObject);
+                players.Remove(id);
+            }
         }
     }
 }

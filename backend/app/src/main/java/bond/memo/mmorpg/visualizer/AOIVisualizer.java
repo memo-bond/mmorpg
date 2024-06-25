@@ -17,7 +17,6 @@ import javax.swing.Timer;
 import javax.swing.WindowConstants;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -32,8 +31,8 @@ public class AOIVisualizer extends JPanel {
 
     private final int gridSize;
     private final int cellSize;
-    private final transient JoinServerHandler joinServerHandler;
-    private final transient PlayerMoveHandler playerMoveHandler;
+    private final transient ClientJoinHandler clientJoinHandler;
+    private final transient ClientMoveHandler clientMoveHandler;
     private final transient AOISystem aoiSystem;
     private final transient Player mainPlayer;
     private final transient List<Player> players;
@@ -47,16 +46,16 @@ public class AOIVisualizer extends JPanel {
         this.players = aoiSystem.getPlayers();
 
         WebSocketClient client = WebSocketClient.from(serverHost);
-        this.joinServerHandler = new JoinServerHandler(client, new ConcurrentLinkedQueue<>());
-        this.playerMoveHandler = new PlayerMoveHandler(client, new ConcurrentLinkedQueue<>());
-        new Thread(joinServerHandler).start();
-        new Thread(playerMoveHandler).start();
+        this.clientJoinHandler = new ClientJoinHandler(client, new ConcurrentLinkedQueue<>());
+        this.clientMoveHandler = new ClientMoveHandler(client, new ConcurrentLinkedQueue<>());
+        new Thread(clientJoinHandler).start();
+        new Thread(clientMoveHandler).start();
 
         aoiSystem.addPlayer(mainPlayer);
-        joinServerHandler.addQueuePlayer(mainPlayer);
+        clientJoinHandler.addQueuePlayer(mainPlayer);
 
         setPreferredSize(new Dimension(gridSize, gridSize));
-        Timer timer = new Timer(500, e -> {
+        Timer timer = new Timer(2000, e -> {
             updatePlayerPositions();
             checkMainPlayerCollisions();
             repaint();
@@ -78,13 +77,11 @@ public class AOIVisualizer extends JPanel {
         Player p2 = PlayerService.nextPlayer();
         p1.setSpeed(50);
         p2.setSpeed(100);
-        log.info("Player 1 {}", p1);
-        log.info("Player 2 {}", p2);
         aoiSystem.addPlayer(p1);
         aoiSystem.addPlayer(p2);
 
-        joinServerHandler.addQueuePlayer(p1);
-        joinServerHandler.addQueuePlayer(p2);
+        clientJoinHandler.addQueuePlayer(p1);
+        clientJoinHandler.addQueuePlayer(p2);
 
         frame.add(this);
         frame.pack();
@@ -110,7 +107,7 @@ public class AOIVisualizer extends JPanel {
         if (mainPlayer != null) {
             Player p = mainPlayer;
             int key = e.getKeyCode();
-            float moveAmount = 5.0f;
+            float moveAmount = 0.1f;
 
             switch (key) {
                 case KeyEvent.VK_UP, KeyEvent.VK_W ->
@@ -130,14 +127,14 @@ public class AOIVisualizer extends JPanel {
 
     private void move(Player p, float x, float y) {
         p.setPosition(Player.Position.from(x, y));
-        playerMoveHandler.move(p.moveMsg());
+        clientMoveHandler.move(p.moveMsg());
     }
 
     private void updatePlayerPositions() {
         for (Map<Integer, GridCell> column : aoiSystem.getGrid().values()) {
             for (GridCell cell : column.values()) {
                 for (Player player : cell.getPlayers()) {
-                    if (player == mainPlayer || player.isMain()) {
+                    if (player == mainPlayer || player.isMain() || player.getId() == 123456) {
                         continue;
                     }
                     movePlayer(player);
@@ -154,7 +151,7 @@ public class AOIVisualizer extends JPanel {
 
         if (p.isPlayerOutOfBounds(gridSize))
             p.setDirection(MyRandomizer.random().nextFloat() * 360);
-        playerMoveHandler.move(p.moveMsg());
+        clientMoveHandler.move(p.moveMsg());
     }
 
     private void updatePlayerCell(Player player, GridCell cell) {
@@ -190,7 +187,7 @@ public class AOIVisualizer extends JPanel {
         player.position(e.getX(), e.getY());
         aoiSystem.addPlayer(player);
         players.add(player);
-        joinServerHandler.addQueuePlayer(player);
+        clientJoinHandler.addQueuePlayer(player);
         repaint(); // Redraw the grid with the new player and AOI
     }
 
@@ -221,8 +218,6 @@ public class AOIVisualizer extends JPanel {
         int numCells = gridSize / cellSize;
         g.setColor(Color.BLACK);
 
-//        FontMetrics metrics = g.getFontMetrics(); // To measure the width and height of the text
-
         for (int i = 0; i <= numCells; i++) {
             int pos = i * cellSize;
             // Draw vertical lines
@@ -231,22 +226,7 @@ public class AOIVisualizer extends JPanel {
             g.drawLine(0, pos, gridSize, pos);
         }
 
-//        addTextGridCorner(g, numCells, metrics);
     }
-
-    private void addTextGridCorner(Graphics g, int numCells, FontMetrics metrics) {
-        g.setColor(Color.RED); // Change the color to make the text visible
-        for (int x = 0; x < numCells; x++) {
-            for (int y = 0; y < numCells; y++) {
-                String text = x * cellSize + "," + y * cellSize;
-                int textHeight = metrics.getHeight();
-                int xPosition = x * cellSize + 2; // Add a small offset for padding
-                int yPosition = y * cellSize + textHeight;
-                g.drawString(text, xPosition, yPosition);
-            }
-        }
-    }
-
 }
 
 

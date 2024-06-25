@@ -14,7 +14,6 @@ namespace Creator_Kit___RPG.Scripts.Connection
         [SerializeField] private bool local;
         public event Action<byte[]> OnMessageReceived;
         private WebSocket _webSocket;
-        private readonly Dictionary<int, CharacterController2D> _players = new();
         
         private async void Start()
         {
@@ -83,22 +82,6 @@ namespace Creator_Kit___RPG.Scripts.Connection
                 }
                 await _webSocket.Send(bytes);
             }
-        }
-
-        public void RegisterPlayer(int id, CharacterController2D controller)
-        {
-            _players[id] = controller;
-        }
-
-        public void UnregisterPlayer(int id)
-        {
-            _players.Remove(id);
-        }
-
-        public CharacterController2D GetPlayerController(int id)
-        {
-            _players.TryGetValue(id, out var controller);
-            return controller;
         }
 
         private async void OnApplicationQuit()

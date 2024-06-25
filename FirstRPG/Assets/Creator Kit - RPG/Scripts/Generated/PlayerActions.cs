@@ -26,17 +26,18 @@ public static partial class PlayerActionsReflection {
           "b2luGAEgASgLMgUuSm9pbkgAEhUKBG1vdmUYAiABKAsyBS5Nb3ZlSAASFQoE",
           "cXVpdBgDIAEoCzIFLlF1aXRIABIXCgVsZWF2ZRgEIAEoCzIGLkxlYXZlSAAS",
           "HQoIcmVzcG9uc2UYBSABKAsyCS5SZXNwb25zZUgAQggKBmFjdGlvbiI2CgRK",
-          "b2luEgoKAmlkGAEgASgFEgwKBG5hbWUYAiABKAkSCQoBeBgDIAEoAhIJCgF5",
-          "GAQgASgCIigKBE1vdmUSCgoCaWQYASABKAUSCQoBeBgCIAEoAhIJCgF5GAMg",
-          "ASgCIhIKBFF1aXQSCgoCaWQYASABKAUiEwoFTGVhdmUSCgoCaWQYASABKAUi",
-          "GwoIUmVzcG9uc2USDwoHc3VjY2VzcxgBIAEoCEIZChdib25kLm1lbW8ubW1v",
-          "cnBnLm1vZGVsc2IGcHJvdG8z"));
+          "b2luEgoKAmlkGAEgASgNEgwKBG5hbWUYAiABKAkSCQoBeBgDIAEoAhIJCgF5",
+          "GAQgASgCIkkKBE1vdmUSCgoCaWQYASABKA0SDAoEbmFtZRgCIAEoCRIJCgF4",
+          "GAMgASgCEgkKAXkYBCABKAISEQoJZGlyZWN0aW9uGAUgASgNIhIKBFF1aXQS",
+          "CgoCaWQYASABKA0iEwoFTGVhdmUSCgoCaWQYASABKA0iGwoIUmVzcG9uc2US",
+          "DwoHc3VjY2VzcxgBIAEoCEIZChdib25kLm1lbW8ubW1vcnBnLm1vZGVsc2IG",
+          "cHJvdG8z"));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
           new pbr::GeneratedClrTypeInfo(typeof(global::PlayerMessage), global::PlayerMessage.Parser, new[]{ "Join", "Move", "Quit", "Leave", "Response" }, new[]{ "Action" }, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::Join), global::Join.Parser, new[]{ "Id", "Name", "X", "Y" }, null, null, null, null),
-          new pbr::GeneratedClrTypeInfo(typeof(global::Move), global::Move.Parser, new[]{ "Id", "X", "Y" }, null, null, null, null),
+          new pbr::GeneratedClrTypeInfo(typeof(global::Move), global::Move.Parser, new[]{ "Id", "Name", "X", "Y", "Direction" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::Quit), global::Quit.Parser, new[]{ "Id" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::Leave), global::Leave.Parser, new[]{ "Id" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::Response), global::Response.Parser, new[]{ "Success" }, null, null, null, null)
@@ -549,10 +550,10 @@ public sealed partial class Join : pb::IMessage<Join>
 
   /// <summary>Field number for the "id" field.</summary>
   public const int IdFieldNumber = 1;
-  private int id_;
+  private uint id_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public int Id {
+  public uint Id {
     get { return id_; }
     set {
       id_ = value;
@@ -645,7 +646,7 @@ public sealed partial class Join : pb::IMessage<Join>
   #else
     if (Id != 0) {
       output.WriteRawTag(8);
-      output.WriteInt32(Id);
+      output.WriteUInt32(Id);
     }
     if (Name.Length != 0) {
       output.WriteRawTag(18);
@@ -671,7 +672,7 @@ public sealed partial class Join : pb::IMessage<Join>
   void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
     if (Id != 0) {
       output.WriteRawTag(8);
-      output.WriteInt32(Id);
+      output.WriteUInt32(Id);
     }
     if (Name.Length != 0) {
       output.WriteRawTag(18);
@@ -696,7 +697,7 @@ public sealed partial class Join : pb::IMessage<Join>
   public int CalculateSize() {
     int size = 0;
     if (Id != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeInt32Size(Id);
+      size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Id);
     }
     if (Name.Length != 0) {
       size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
@@ -751,7 +752,7 @@ public sealed partial class Join : pb::IMessage<Join>
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
           break;
         case 8: {
-          Id = input.ReadInt32();
+          Id = input.ReadUInt32();
           break;
         }
         case 18: {
@@ -786,7 +787,7 @@ public sealed partial class Join : pb::IMessage<Join>
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
           break;
         case 8: {
-          Id = input.ReadInt32();
+          Id = input.ReadUInt32();
           break;
         }
         case 18: {
@@ -844,8 +845,10 @@ public sealed partial class Move : pb::IMessage<Move>
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public Move(Move other) : this() {
     id_ = other.id_;
+    name_ = other.name_;
     x_ = other.x_;
     y_ = other.y_;
+    direction_ = other.direction_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -857,18 +860,30 @@ public sealed partial class Move : pb::IMessage<Move>
 
   /// <summary>Field number for the "id" field.</summary>
   public const int IdFieldNumber = 1;
-  private int id_;
+  private uint id_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public int Id {
+  public uint Id {
     get { return id_; }
     set {
       id_ = value;
     }
   }
 
+  /// <summary>Field number for the "name" field.</summary>
+  public const int NameFieldNumber = 2;
+  private string name_ = "";
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public string Name {
+    get { return name_; }
+    set {
+      name_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    }
+  }
+
   /// <summary>Field number for the "x" field.</summary>
-  public const int XFieldNumber = 2;
+  public const int XFieldNumber = 3;
   private float x_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -880,7 +895,7 @@ public sealed partial class Move : pb::IMessage<Move>
   }
 
   /// <summary>Field number for the "y" field.</summary>
-  public const int YFieldNumber = 3;
+  public const int YFieldNumber = 4;
   private float y_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -888,6 +903,18 @@ public sealed partial class Move : pb::IMessage<Move>
     get { return y_; }
     set {
       y_ = value;
+    }
+  }
+
+  /// <summary>Field number for the "direction" field.</summary>
+  public const int DirectionFieldNumber = 5;
+  private uint direction_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public uint Direction {
+    get { return direction_; }
+    set {
+      direction_ = value;
     }
   }
 
@@ -907,8 +934,10 @@ public sealed partial class Move : pb::IMessage<Move>
       return true;
     }
     if (Id != other.Id) return false;
+    if (Name != other.Name) return false;
     if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(X, other.X)) return false;
     if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Y, other.Y)) return false;
+    if (Direction != other.Direction) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -917,8 +946,10 @@ public sealed partial class Move : pb::IMessage<Move>
   public override int GetHashCode() {
     int hash = 1;
     if (Id != 0) hash ^= Id.GetHashCode();
+    if (Name.Length != 0) hash ^= Name.GetHashCode();
     if (X != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(X);
     if (Y != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Y);
+    if (Direction != 0) hash ^= Direction.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -939,15 +970,23 @@ public sealed partial class Move : pb::IMessage<Move>
   #else
     if (Id != 0) {
       output.WriteRawTag(8);
-      output.WriteInt32(Id);
+      output.WriteUInt32(Id);
+    }
+    if (Name.Length != 0) {
+      output.WriteRawTag(18);
+      output.WriteString(Name);
     }
     if (X != 0F) {
-      output.WriteRawTag(21);
+      output.WriteRawTag(29);
       output.WriteFloat(X);
     }
     if (Y != 0F) {
-      output.WriteRawTag(29);
+      output.WriteRawTag(37);
       output.WriteFloat(Y);
+    }
+    if (Direction != 0) {
+      output.WriteRawTag(40);
+      output.WriteUInt32(Direction);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
@@ -961,15 +1000,23 @@ public sealed partial class Move : pb::IMessage<Move>
   void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
     if (Id != 0) {
       output.WriteRawTag(8);
-      output.WriteInt32(Id);
+      output.WriteUInt32(Id);
+    }
+    if (Name.Length != 0) {
+      output.WriteRawTag(18);
+      output.WriteString(Name);
     }
     if (X != 0F) {
-      output.WriteRawTag(21);
+      output.WriteRawTag(29);
       output.WriteFloat(X);
     }
     if (Y != 0F) {
-      output.WriteRawTag(29);
+      output.WriteRawTag(37);
       output.WriteFloat(Y);
+    }
+    if (Direction != 0) {
+      output.WriteRawTag(40);
+      output.WriteUInt32(Direction);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
@@ -982,13 +1029,19 @@ public sealed partial class Move : pb::IMessage<Move>
   public int CalculateSize() {
     int size = 0;
     if (Id != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeInt32Size(Id);
+      size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Id);
+    }
+    if (Name.Length != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
     }
     if (X != 0F) {
       size += 1 + 4;
     }
     if (Y != 0F) {
       size += 1 + 4;
+    }
+    if (Direction != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Direction);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -1005,11 +1058,17 @@ public sealed partial class Move : pb::IMessage<Move>
     if (other.Id != 0) {
       Id = other.Id;
     }
+    if (other.Name.Length != 0) {
+      Name = other.Name;
+    }
     if (other.X != 0F) {
       X = other.X;
     }
     if (other.Y != 0F) {
       Y = other.Y;
+    }
+    if (other.Direction != 0) {
+      Direction = other.Direction;
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -1031,15 +1090,23 @@ public sealed partial class Move : pb::IMessage<Move>
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
           break;
         case 8: {
-          Id = input.ReadInt32();
+          Id = input.ReadUInt32();
           break;
         }
-        case 21: {
-          X = input.ReadFloat();
+        case 18: {
+          Name = input.ReadString();
           break;
         }
         case 29: {
+          X = input.ReadFloat();
+          break;
+        }
+        case 37: {
           Y = input.ReadFloat();
+          break;
+        }
+        case 40: {
+          Direction = input.ReadUInt32();
           break;
         }
       }
@@ -1062,15 +1129,23 @@ public sealed partial class Move : pb::IMessage<Move>
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
           break;
         case 8: {
-          Id = input.ReadInt32();
+          Id = input.ReadUInt32();
           break;
         }
-        case 21: {
-          X = input.ReadFloat();
+        case 18: {
+          Name = input.ReadString();
           break;
         }
         case 29: {
+          X = input.ReadFloat();
+          break;
+        }
+        case 37: {
           Y = input.ReadFloat();
+          break;
+        }
+        case 40: {
+          Direction = input.ReadUInt32();
           break;
         }
       }
@@ -1127,10 +1202,10 @@ public sealed partial class Quit : pb::IMessage<Quit>
 
   /// <summary>Field number for the "id" field.</summary>
   public const int IdFieldNumber = 1;
-  private int id_;
+  private uint id_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public int Id {
+  public uint Id {
     get { return id_; }
     set {
       id_ = value;
@@ -1181,7 +1256,7 @@ public sealed partial class Quit : pb::IMessage<Quit>
   #else
     if (Id != 0) {
       output.WriteRawTag(8);
-      output.WriteInt32(Id);
+      output.WriteUInt32(Id);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
@@ -1195,7 +1270,7 @@ public sealed partial class Quit : pb::IMessage<Quit>
   void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
     if (Id != 0) {
       output.WriteRawTag(8);
-      output.WriteInt32(Id);
+      output.WriteUInt32(Id);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
@@ -1208,7 +1283,7 @@ public sealed partial class Quit : pb::IMessage<Quit>
   public int CalculateSize() {
     int size = 0;
     if (Id != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeInt32Size(Id);
+      size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Id);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -1245,7 +1320,7 @@ public sealed partial class Quit : pb::IMessage<Quit>
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
           break;
         case 8: {
-          Id = input.ReadInt32();
+          Id = input.ReadUInt32();
           break;
         }
       }
@@ -1268,7 +1343,7 @@ public sealed partial class Quit : pb::IMessage<Quit>
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
           break;
         case 8: {
-          Id = input.ReadInt32();
+          Id = input.ReadUInt32();
           break;
         }
       }
@@ -1325,10 +1400,10 @@ public sealed partial class Leave : pb::IMessage<Leave>
 
   /// <summary>Field number for the "id" field.</summary>
   public const int IdFieldNumber = 1;
-  private int id_;
+  private uint id_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public int Id {
+  public uint Id {
     get { return id_; }
     set {
       id_ = value;
@@ -1379,7 +1454,7 @@ public sealed partial class Leave : pb::IMessage<Leave>
   #else
     if (Id != 0) {
       output.WriteRawTag(8);
-      output.WriteInt32(Id);
+      output.WriteUInt32(Id);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
@@ -1393,7 +1468,7 @@ public sealed partial class Leave : pb::IMessage<Leave>
   void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
     if (Id != 0) {
       output.WriteRawTag(8);
-      output.WriteInt32(Id);
+      output.WriteUInt32(Id);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
@@ -1406,7 +1481,7 @@ public sealed partial class Leave : pb::IMessage<Leave>
   public int CalculateSize() {
     int size = 0;
     if (Id != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeInt32Size(Id);
+      size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Id);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -1443,7 +1518,7 @@ public sealed partial class Leave : pb::IMessage<Leave>
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
           break;
         case 8: {
-          Id = input.ReadInt32();
+          Id = input.ReadUInt32();
           break;
         }
       }
@@ -1466,7 +1541,7 @@ public sealed partial class Leave : pb::IMessage<Leave>
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
           break;
         case 8: {
-          Id = input.ReadInt32();
+          Id = input.ReadUInt32();
           break;
         }
       }

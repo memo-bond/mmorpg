@@ -9,13 +9,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
 @Slf4j
-class PlayerMoveHandler implements Runnable {
+class ClientMoveHandler implements Runnable {
 
     private final WebSocketClient client;
     private final Queue<PlayerActions.PlayerMessage> queue;
     private volatile boolean running = true;
 
-    public PlayerMoveHandler(WebSocketClient client, Queue<PlayerActions.PlayerMessage> queue) {
+    public ClientMoveHandler(WebSocketClient client, Queue<PlayerActions.PlayerMessage> queue) {
         this.client = client;
         this.queue = queue;
     }

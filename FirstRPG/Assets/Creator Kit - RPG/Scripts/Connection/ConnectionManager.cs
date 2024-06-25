@@ -1,4 +1,3 @@
-using System.Text;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using NativeWebSocket;
@@ -8,14 +7,14 @@ namespace Creator_Kit___RPG.Scripts.Connection
 {
     public class ConnectionManager : MonoBehaviour
     {
-        [SerializeField] private PlayerManager playerManager;
+        [SerializeField] private PlayerManager.PlayerManager playerManager;
         [SerializeField] private WebSocketClientHandler client;
 
         private void Start()
         {
             client.OnMessageReceived += HandleServerMessage;
         }
-        
+
         private void OnDestroy()
         {
             if (client != null)
@@ -23,7 +22,7 @@ namespace Creator_Kit___RPG.Scripts.Connection
                 client.OnMessageReceived -= HandleServerMessage;
             }
         }
-        
+
         public async Task Send(IMessage msg)
         {
             await client.Send(msg);
@@ -37,6 +36,7 @@ namespace Creator_Kit___RPG.Scripts.Connection
         private void HandleServerMessage(byte[] data)
         {
             var msg = PlayerMessage.Parser.ParseFrom(data);
+            Debug.Log("Received msg from server " + msg);
             switch (msg.ActionCase)
             {
                 case PlayerMessage.ActionOneofCase.Join:
@@ -70,18 +70,27 @@ namespace Creator_Kit___RPG.Scripts.Connection
 
         private void HandleJoinMessage(Join join)
         {
-            playerManager.AddPlayer(join.Id, join.Name, new Vector3(join.X, join.Y, 0));
+            Move move = new()
+            {
+                Id = join.Id,
+                Name = join.Name,
+                X = join.X,
+                Y = join.Y
+            };
+            playerManager.AddPlayer(move);
         }
 
         private void HandleMoveMessage(Move move)
         {
-            playerManager.UpdatePlayerPosition(move.Id, new Vector3(move.X, move.Y, 0));
-            
-            var player = client.GetPlayerController(move.Id);
-            if (player != null)
+            Debug.Log($"Player move {move.Id}-X={move.X}-Y={move.Y}");
+
+            var addPlayer = playerManager.AddPlayer(move);
+            if (addPlayer)
             {
-                player.Position = new Vector3(move.X, move.Y, 0);
+                Debug.Log($"Player ID {move.Id} already added, update move only");
             }
+
+            playerManager.UpdatePlayerPosition(move);
         }
 
         private void HandleQuitMessage(Quit quit)
