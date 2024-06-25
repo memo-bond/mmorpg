@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import static bond.memo.mmorpg.utils.ByteUtils.protoMsgToBytes;
 
@@ -31,20 +32,21 @@ public class MoveHandler extends BaseHandler<PlayerActions.Move> implements Hand
                 log.info("MOVE action player `{}`", player);
             }
             Objects.requireNonNull(player, "player is null - check player join");
-            player.move(move.getX(), move.getY());
+            player.move(move.getX(), move.getY(), move.getDirection().ordinal());
             broadcastMove(player);
             response(ctx);
         }
     }
 
     private void broadcastMove(Player player) {
-        List<Player> otherPlayers = aoiSystem.getPlayersInAOI(player);
-        if (otherPlayers.size() == 1 && otherPlayers.getFirst().equals(player)) return;
+        Set<Player> otherPlayers = aoiSystem.getPlayersInAOI(player);
+        if (otherPlayers.size() == 1) return;
 
         if (!otherPlayers.isEmpty() && !otherPlayers.contains(player)) {
             for (Player otherPlayer : otherPlayers) {
-                log.info("broadcast move `{}`-`{}` to `{}`-`{}`",
-                        player.getId(), player.getName(), otherPlayer.getId(), otherPlayer.getName());
+                if (otherPlayer.getId() == 123456)
+                    log.info("broadcast move `{}`-`{}` to `{}`-`{}`",
+                            player.getId(), player.getName(), otherPlayer.getId(), otherPlayer.getName());
             }
         }
 
@@ -52,12 +54,12 @@ public class MoveHandler extends BaseHandler<PlayerActions.Move> implements Hand
             if (otherPlayer.getId() != player.getId() && otherPlayer.getChannel() != null) {
                 log.info("broadcast move {}, direction {}", player.moveMsg(), player.calcDirection());
                 otherPlayer.getChannel().writeAndFlush(
-                        protoMsgToBytes(player.moveMsg()))
+                                protoMsgToBytes(player.moveMsg()))
                         .addListener((ChannelFutureListener) future -> {
-                    if (!future.isSuccess()) {
-                        log.error("Failed to send move message to player ID {}, {}", otherPlayer.getId(), future.cause().getStackTrace());
-                    }
-                });
+                            if (!future.isSuccess()) {
+                                log.error("Failed to send move message to player ID {}, {}", otherPlayer.getId(), future.cause().getStackTrace());
+                            }
+                        });
             }
         }
     }

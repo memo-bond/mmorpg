@@ -24,12 +24,13 @@ public class Player {
     private Color color;
     private boolean main;
     private Channel channel;
+    private MoveDirection moveDirection;
 
     public Player() {
     }
 
     public Player(int id, String name, Position position, float direction,
-                  float speed, float radius, Color color, boolean main, Channel channel) {
+                  float speed, float radius, Color color, boolean main, Channel channel, MoveDirection moveDirection) {
         this.id = id;
         this.name = name;
         this.position = position;
@@ -39,18 +40,17 @@ public class Player {
         this.color = color == null ? ColorUtil.getRandomColor() : color;
         this.main = main;
         this.channel = channel;
+        this.moveDirection = MoveDirection.DOWN;
     }
 
     public PlayerActions.PlayerMessage moveMsg() {
         var move = PlayerActions.Move.newBuilder()
                 .setId(id).setName(name).setX(position.x).setY(position.y)
-                .setDirection(calcDirection().ordinal())
+                .setDirection(PlayerActions.MoveDirection.forNumber(calcDirection().ordinal()))
                 .build();
-        var msg = PlayerActions.PlayerMessage.newBuilder()
+        return PlayerActions.PlayerMessage.newBuilder()
                 .setMove(move)
                 .build();
-        log.info("Msg {}", move);
-        return msg;
     }
 
     public MoveDirection calcDirection() {
@@ -83,9 +83,10 @@ public class Player {
         position.setY(position.getY() + speed * (float) Math.sin(radians) * deltaTime);
     }
 
-    public void move(float x, float y) {
+    public void move(float x, float y, int direction) {
         position.x = x;
         position.y = y;
+        this.direction = MoveDirection.values()[direction].degree();
     }
 
     public boolean isMain() {

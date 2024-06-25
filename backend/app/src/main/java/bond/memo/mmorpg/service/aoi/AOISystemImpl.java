@@ -5,9 +5,11 @@ import bond.memo.mmorpg.model.Player;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -39,7 +41,7 @@ public class AOISystemImpl extends BaseAOISystem {
         log.info("Add player column `{}` row `{}`", column, row);
         grid.computeIfAbsent(column, k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(row, k -> new GridCell())
-                .getPlayers().add(player);
+                .getPlayers().add(player.getId());
         playerMap.put(player.getId(), player);
     }
 
@@ -69,7 +71,7 @@ public class AOISystemImpl extends BaseAOISystem {
         playerMap.remove(player.getId()); // Remove player from the ID map
     }
 
-    public List<Player> getPlayersInAOI(Player player) {
+    public Set<Player> getPlayersInAOI(Player player) {
         Player.Position position = player.getPosition();
         float radius = player.getRadius();
         int minCellX = getCellIndex(position.getX() - radius);
@@ -77,7 +79,7 @@ public class AOISystemImpl extends BaseAOISystem {
         int minCellY = getCellIndex(position.getY() - radius);
         int maxCellY = getCellIndex(position.getY() + radius);
 
-        List<Player> entitiesInAOI = new LinkedList<>();
+        Set<Integer> entitiesInAOI = new HashSet<>();
         for (int x = minCellX; x <= maxCellX; x++) {
             for (int y = minCellY; y <= maxCellY; y++) {
                 Map<Integer, GridCell> column = grid.get(x);
@@ -90,8 +92,9 @@ public class AOISystemImpl extends BaseAOISystem {
             }
         }
         // Filter players within the exact radius
-        List<Player> playersWithinRadius = new LinkedList<>();
-        for (Player p : entitiesInAOI) {
+        Set<Player> playersWithinRadius = new HashSet<>();
+        for (Integer playerId : entitiesInAOI) {
+            Player p = getPlayerById(playerId);
             if (distance(position, p.getPosition()) <= radius) {
                 playersWithinRadius.add(p);
             }

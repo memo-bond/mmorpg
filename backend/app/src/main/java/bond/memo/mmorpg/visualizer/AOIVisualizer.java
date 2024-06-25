@@ -3,6 +3,7 @@ package bond.memo.mmorpg.visualizer;
 import bond.memo.mmorpg.client.WebSocketClient;
 import bond.memo.mmorpg.config.adapter.KeyListenerAdapter;
 import bond.memo.mmorpg.config.adapter.MouseListenerAdapter;
+import bond.memo.mmorpg.enums.MoveDirection;
 import bond.memo.mmorpg.service.AOISystem;
 import bond.memo.mmorpg.service.aoi.GridCell;
 import bond.memo.mmorpg.model.Player;
@@ -110,14 +111,22 @@ public class AOIVisualizer extends JPanel {
             float moveAmount = 0.1f;
 
             switch (key) {
-                case KeyEvent.VK_UP, KeyEvent.VK_W ->
-                        move(p, p.getPosition().getX(), p.getPosition().getY() - moveAmount);
-                case KeyEvent.VK_DOWN, KeyEvent.VK_S ->
-                        move(p, p.getPosition().getX(), p.getPosition().getY() + moveAmount);
-                case KeyEvent.VK_LEFT, KeyEvent.VK_A ->
-                        move(p, p.getPosition().getX() - moveAmount, p.getPosition().getY());
-                case KeyEvent.VK_RIGHT, KeyEvent.VK_D ->
-                        move(p, p.getPosition().getX() + moveAmount, p.getPosition().getY());
+                case KeyEvent.VK_UP, KeyEvent.VK_W -> {
+                    p.setDirection(MoveDirection.UP.degree());
+                    move(p, p.getPosition().getX(), p.getPosition().getY() - moveAmount);
+                }
+                case KeyEvent.VK_DOWN, KeyEvent.VK_S -> {
+                    p.setDirection(MoveDirection.DOWN.degree());
+                    move(p, p.getPosition().getX(), p.getPosition().getY() + moveAmount);
+                }
+                case KeyEvent.VK_LEFT, KeyEvent.VK_A -> {
+                    p.setDirection(MoveDirection.LEFT.degree());
+                    move(p, p.getPosition().getX() - moveAmount, p.getPosition().getY());
+                }
+                case KeyEvent.VK_RIGHT, KeyEvent.VK_D -> {
+                    p.setDirection(MoveDirection.RIGHT.degree());
+                    move(p, p.getPosition().getX() + moveAmount, p.getPosition().getY());
+                }
                 default -> log.info("Unknown key code {}", key);
             }
             p.ensurePlayerWithinBounds(gridSize);
@@ -133,7 +142,8 @@ public class AOIVisualizer extends JPanel {
     private void updatePlayerPositions() {
         for (Map<Integer, GridCell> column : aoiSystem.getGrid().values()) {
             for (GridCell cell : column.values()) {
-                for (Player player : cell.getPlayers()) {
+                for (Integer playerId : cell.getPlayers()) {
+                    Player player = aoiSystem.getPlayerById(playerId);
                     if (player == mainPlayer || player.isMain() || player.getId() == 123456) {
                         continue;
                     }
@@ -169,7 +179,8 @@ public class AOIVisualizer extends JPanel {
     private void handlePlayerCollisions(Player player) {
         for (Map<Integer, GridCell> column : aoiSystem.getGrid().values()) {
             for (GridCell cell : column.values()) {
-                for (Player otherPlayer : cell.getPlayers()) {
+                for (Integer otherPlayerId : cell.getPlayers()) {
+                    Player otherPlayer = aoiSystem.getPlayerById(otherPlayerId);
                     if (player.getId() != otherPlayer.getId() && player.isCollision(otherPlayer)) {
                         // Perform action when collision occurs
                         // Example action: Change player direction
@@ -199,19 +210,30 @@ public class AOIVisualizer extends JPanel {
     }
 
     private void drawPlayers(Graphics g) {
-        for (Map<Integer, GridCell> column : aoiSystem.getGrid().values()) {
-            for (GridCell cell : column.values()) {
-                for (Player player : cell.getPlayers()) {
-                    g.setColor(player.getColor());
-                    int x = (int) player.getPosition().getX();
-                    int y = (int) player.getPosition().getY();
-                    g.fillOval(x - 5, y - 5, 10, 10); // Draw player as a small circle
-                    g.drawOval(x - (int) player.getRadius(), y - (int) player.getRadius(),
-                            (int) player.getRadius() * 2, (int) player.getRadius() * 2); // Draw player's radius
-                    g.drawString(player.getName(), (int) (x - RADIUS), (int) (y - RADIUS));
-                }
-            }
+
+        for (Player player : aoiSystem.getPlayerMap().values()) {
+            g.setColor(player.getColor());
+            int x = (int) player.getPosition().getX();
+            int y = (int) player.getPosition().getY();
+            g.fillOval(x - 5, y - 5, 10, 10); // Draw player as a small circle
+            g.drawOval(x - (int) player.getRadius(), y - (int) player.getRadius(),
+                    (int) player.getRadius() * 2, (int) player.getRadius() * 2); // Draw player's radius
+            g.drawString(player.getName(), (int) (x - RADIUS), (int) (y - RADIUS));
         }
+
+//        for (Map<Integer, GridCell> column : aoiSystem.getGrid().values()) {
+//            for (GridCell cell : column.values()) {
+//                for (Player player : cell.getPlayers()) {
+//                    g.setColor(player.getColor());
+//                    int x = (int) player.getPosition().getX();
+//                    int y = (int) player.getPosition().getY();
+//                    g.fillOval(x - 5, y - 5, 10, 10); // Draw player as a small circle
+//                    g.drawOval(x - (int) player.getRadius(), y - (int) player.getRadius(),
+//                            (int) player.getRadius() * 2, (int) player.getRadius() * 2); // Draw player's radius
+//                    g.drawString(player.getName(), (int) (x - RADIUS), (int) (y - RADIUS));
+//                }
+//            }
+//        }
     }
 
     private void drawGrid(Graphics g) {

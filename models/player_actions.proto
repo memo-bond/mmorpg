@@ -12,6 +12,13 @@ message PlayerMessage {
   }
 }
 
+enum MoveDirection {
+  LEFT = 0;
+  RIGHT = 1;
+  UP = 2;
+  DOWN = 3;
+}
+
 message Join {
   uint32 id = 1;
   string name = 2;
@@ -24,7 +31,7 @@ message Move {
   string name = 2;
   float x = 3;
   float y = 4;
-  uint32 direction = 5;
+  MoveDirection direction = 5;
 }
 
 message Quit {

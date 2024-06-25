@@ -27,14 +27,15 @@ public static partial class PlayerActionsReflection {
           "cXVpdBgDIAEoCzIFLlF1aXRIABIXCgVsZWF2ZRgEIAEoCzIGLkxlYXZlSAAS",
           "HQoIcmVzcG9uc2UYBSABKAsyCS5SZXNwb25zZUgAQggKBmFjdGlvbiI2CgRK",
           "b2luEgoKAmlkGAEgASgNEgwKBG5hbWUYAiABKAkSCQoBeBgDIAEoAhIJCgF5",
-          "GAQgASgCIkkKBE1vdmUSCgoCaWQYASABKA0SDAoEbmFtZRgCIAEoCRIJCgF4",
-          "GAMgASgCEgkKAXkYBCABKAISEQoJZGlyZWN0aW9uGAUgASgNIhIKBFF1aXQS",
-          "CgoCaWQYASABKA0iEwoFTGVhdmUSCgoCaWQYASABKA0iGwoIUmVzcG9uc2US",
-          "DwoHc3VjY2VzcxgBIAEoCEIZChdib25kLm1lbW8ubW1vcnBnLm1vZGVsc2IG",
-          "cHJvdG8z"));
+          "GAQgASgCIlkKBE1vdmUSCgoCaWQYASABKA0SDAoEbmFtZRgCIAEoCRIJCgF4",
+          "GAMgASgCEgkKAXkYBCABKAISIQoJZGlyZWN0aW9uGAUgASgOMg4uTW92ZURp",
+          "cmVjdGlvbiISCgRRdWl0EgoKAmlkGAEgASgNIhMKBUxlYXZlEgoKAmlkGAEg",
+          "ASgNIhsKCFJlc3BvbnNlEg8KB3N1Y2Nlc3MYASABKAgqNgoNTW92ZURpcmVj",
+          "dGlvbhIICgRMRUZUEAASCQoFUklHSFQQARIGCgJVUBACEggKBERPV04QA0IZ",
+          "Chdib25kLm1lbW8ubW1vcnBnLm1vZGVsc2IGcHJvdG8z"));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
-        new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
+        new pbr::GeneratedClrTypeInfo(new[] {typeof(global::MoveDirection), }, null, new pbr::GeneratedClrTypeInfo[] {
           new pbr::GeneratedClrTypeInfo(typeof(global::PlayerMessage), global::PlayerMessage.Parser, new[]{ "Join", "Move", "Quit", "Leave", "Response" }, new[]{ "Action" }, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::Join), global::Join.Parser, new[]{ "Id", "Name", "X", "Y" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::Move), global::Move.Parser, new[]{ "Id", "Name", "X", "Y", "Direction" }, null, null, null, null),
@@ -46,6 +47,16 @@ public static partial class PlayerActionsReflection {
   #endregion
 
 }
+#region Enums
+public enum MoveDirection {
+  [pbr::OriginalName("LEFT")] Left = 0,
+  [pbr::OriginalName("RIGHT")] Right = 1,
+  [pbr::OriginalName("UP")] Up = 2,
+  [pbr::OriginalName("DOWN")] Down = 3,
+}
+
+#endregion
+
 #region Messages
 [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
 public sealed partial class PlayerMessage : pb::IMessage<PlayerMessage>
@@ -908,10 +919,10 @@ public sealed partial class Move : pb::IMessage<Move>
 
   /// <summary>Field number for the "direction" field.</summary>
   public const int DirectionFieldNumber = 5;
-  private uint direction_;
+  private global::MoveDirection direction_ = global::MoveDirection.Left;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public uint Direction {
+  public global::MoveDirection Direction {
     get { return direction_; }
     set {
       direction_ = value;
@@ -949,7 +960,7 @@ public sealed partial class Move : pb::IMessage<Move>
     if (Name.Length != 0) hash ^= Name.GetHashCode();
     if (X != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(X);
     if (Y != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Y);
-    if (Direction != 0) hash ^= Direction.GetHashCode();
+    if (Direction != global::MoveDirection.Left) hash ^= Direction.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -984,9 +995,9 @@ public sealed partial class Move : pb::IMessage<Move>
       output.WriteRawTag(37);
       output.WriteFloat(Y);
     }
-    if (Direction != 0) {
+    if (Direction != global::MoveDirection.Left) {
       output.WriteRawTag(40);
-      output.WriteUInt32(Direction);
+      output.WriteEnum((int) Direction);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
@@ -1014,9 +1025,9 @@ public sealed partial class Move : pb::IMessage<Move>
       output.WriteRawTag(37);
       output.WriteFloat(Y);
     }
-    if (Direction != 0) {
+    if (Direction != global::MoveDirection.Left) {
       output.WriteRawTag(40);
-      output.WriteUInt32(Direction);
+      output.WriteEnum((int) Direction);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
@@ -1040,8 +1051,8 @@ public sealed partial class Move : pb::IMessage<Move>
     if (Y != 0F) {
       size += 1 + 4;
     }
-    if (Direction != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Direction);
+    if (Direction != global::MoveDirection.Left) {
+      size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Direction);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -1067,7 +1078,7 @@ public sealed partial class Move : pb::IMessage<Move>
     if (other.Y != 0F) {
       Y = other.Y;
     }
-    if (other.Direction != 0) {
+    if (other.Direction != global::MoveDirection.Left) {
       Direction = other.Direction;
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
@@ -1106,7 +1117,7 @@ public sealed partial class Move : pb::IMessage<Move>
           break;
         }
         case 40: {
-          Direction = input.ReadUInt32();
+          Direction = (global::MoveDirection) input.ReadEnum();
           break;
         }
       }
@@ -1145,7 +1156,7 @@ public sealed partial class Move : pb::IMessage<Move>
           break;
         }
         case 40: {
-          Direction = input.ReadUInt32();
+          Direction = (global::MoveDirection) input.ReadEnum();
           break;
         }
       }

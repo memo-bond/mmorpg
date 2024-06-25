@@ -39,16 +39,16 @@ namespace Creator_Kit___RPG.Scripts.PlayerManager
                 Debug.Log($"move.Direction {move.Direction}");
                 switch (move.Direction)
                 {
-                    case 0:
-                        player.nextMoveCommand = new Vector3(0.1f, 0, 0);
-                        break;
-                    case 1:
+                    case MoveDirection.Left:
                         player.nextMoveCommand = new Vector3(-0.1f, 0, 0);
                         break;
-                    case 2:
+                    case MoveDirection.Right:
+                        player.nextMoveCommand = new Vector3(0.1f, 0, 0);
+                        break;
+                    case MoveDirection.Up:
                         player.nextMoveCommand = new Vector3(0, 0.1f, 0);
                         break;
-                    case 3:
+                    case MoveDirection.Down:
                         player.nextMoveCommand = new Vector3(0, -0.1f, 0);
                         break;
                 }

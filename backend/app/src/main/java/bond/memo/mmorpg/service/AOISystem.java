@@ -5,6 +5,7 @@ import bond.memo.mmorpg.service.aoi.GridCell;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface AOISystem {
 
@@ -18,7 +19,7 @@ public interface AOISystem {
 
     void removePlayer(int id);
 
-    List<Player> getPlayersInAOI(Player player);
+    Set<Player> getPlayersInAOI(Player player);
 
     Map<Integer, Map<Integer, GridCell>> getGrid();
 
