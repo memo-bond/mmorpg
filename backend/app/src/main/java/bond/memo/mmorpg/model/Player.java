@@ -43,9 +43,9 @@ public class Player {
         this.moveDirection = MoveDirection.DOWN;
     }
 
-    public PlayerActions.PlayerMessage moveMsg() {
+    public PlayerActions.PlayerMessage moveMsg(float y) {
         var move = PlayerActions.Move.newBuilder()
-                .setId(id).setName(name).setX(position.x).setY(position.y)
+                .setId(id).setName(name).setX(position.x).setY(y)
                 .setDirection(PlayerActions.MoveDirection.forNumber(calcDirection().ordinal()))
                 .build();
         return PlayerActions.PlayerMessage.newBuilder()

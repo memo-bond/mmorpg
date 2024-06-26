@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static bond.memo.mmorpg.constants.Constants.RADIUS;
+import static bond.memo.mmorpg.converter.GridHeightConverter.aoiToUnityY;
+import static bond.memo.mmorpg.converter.GridHeightConverter.unityToAoiY;
 
 @Slf4j
 public class AOIVisualizer extends JPanel {
@@ -112,12 +114,12 @@ public class AOIVisualizer extends JPanel {
 
             switch (key) {
                 case KeyEvent.VK_UP, KeyEvent.VK_W -> {
-                    p.setDirection(MoveDirection.UP.degree());
-                    move(p, p.getPosition().getX(), p.getPosition().getY() - moveAmount);
-                }
-                case KeyEvent.VK_DOWN, KeyEvent.VK_S -> {
                     p.setDirection(MoveDirection.DOWN.degree());
                     move(p, p.getPosition().getX(), p.getPosition().getY() + moveAmount);
+                }
+                case KeyEvent.VK_DOWN, KeyEvent.VK_S -> {
+                    p.setDirection(MoveDirection.UP.degree());
+                    move(p, p.getPosition().getX(), p.getPosition().getY() - moveAmount);
                 }
                 case KeyEvent.VK_LEFT, KeyEvent.VK_A -> {
                     p.setDirection(MoveDirection.LEFT.degree());
@@ -136,7 +138,7 @@ public class AOIVisualizer extends JPanel {
 
     private void move(Player p, float x, float y) {
         p.setPosition(Player.Position.from(x, y));
-        clientMoveHandler.move(p.moveMsg());
+        clientMoveHandler.move(p.moveMsg(unityToAoiY(p.getPosition().getY())));
     }
 
     private void updatePlayerPositions() {
@@ -161,7 +163,7 @@ public class AOIVisualizer extends JPanel {
 
         if (p.isPlayerOutOfBounds(gridSize))
             p.setDirection(MyRandomizer.random().nextFloat() * 360);
-        clientMoveHandler.move(p.moveMsg());
+        clientMoveHandler.move(p.moveMsg(unityToAoiY(p.getPosition().getY())));
     }
 
     private void updatePlayerCell(Player player, GridCell cell) {

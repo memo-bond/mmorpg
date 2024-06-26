@@ -7,10 +7,10 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import static bond.memo.mmorpg.converter.GridHeightConverter.aoiToUnityY;
 import static bond.memo.mmorpg.utils.ByteUtils.protoMsgToBytes;
 
 @Slf4j
@@ -52,9 +52,9 @@ public class MoveHandler extends BaseHandler<PlayerActions.Move> implements Hand
 
         for (Player otherPlayer : otherPlayers) {
             if (otherPlayer.getId() != player.getId() && otherPlayer.getChannel() != null) {
-                log.info("broadcast move {}, direction {}", player.moveMsg(), player.calcDirection());
+                log.info("broadcast move {}, direction {}", player.moveMsg(aoiToUnityY(player.getPosition().getY())), player.calcDirection());
                 otherPlayer.getChannel().writeAndFlush(
-                                protoMsgToBytes(player.moveMsg()))
+                                protoMsgToBytes(player.moveMsg(aoiToUnityY(player.getPosition().getY()))))
                         .addListener((ChannelFutureListener) future -> {
                             if (!future.isSuccess()) {
                                 log.error("Failed to send move message to player ID {}, {}", otherPlayer.getId(), future.cause().getStackTrace());

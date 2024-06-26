@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using Creator_Kit___RPG.Scripts.Connection;
+using Creator_Kit___RPG.Scripts.Gameplay;
 using NativeWebSocket;
 using UnityEngine;
 using UnityEngine.U2D;
@@ -162,7 +163,7 @@ namespace RPGM.Gameplay
                 {
                     Id = id,
                     X = transform.position.x,
-                    Y = transform.position.y
+                    Y = CoordinateConverter.UnityToAoiY(transform.position.y)
                 }
             };
 
