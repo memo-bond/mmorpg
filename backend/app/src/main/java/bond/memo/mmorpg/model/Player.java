@@ -25,12 +25,14 @@ public class Player {
     private boolean main;
     private Channel channel;
     private MoveDirection moveDirection;
+    private boolean unity;
 
     public Player() {
     }
 
     public Player(int id, String name, Position position, float direction,
-                  float speed, float radius, Color color, boolean main, Channel channel, MoveDirection moveDirection) {
+                  float speed, float radius, Color color, boolean main, Channel channel,
+                  MoveDirection moveDirection, boolean unity) {
         this.id = id;
         this.name = name;
         this.position = position;
@@ -41,11 +43,12 @@ public class Player {
         this.main = main;
         this.channel = channel;
         this.moveDirection = MoveDirection.DOWN;
+        this.unity = unity;
     }
 
-    public PlayerActions.PlayerMessage moveMsg() {
+    public PlayerActions.PlayerMessage moveMsg(float y) {
         var move = PlayerActions.Move.newBuilder()
-                .setId(id).setName(name).setX(position.x).setY(position.y)
+                .setId(id).setName(name).setX(position.x).setY(y)
                 .setDirection(PlayerActions.MoveDirection.forNumber(calcDirection().ordinal()))
                 .build();
         return PlayerActions.PlayerMessage.newBuilder()
@@ -99,10 +102,7 @@ public class Player {
         float dx = position.getX() - otherPlayer.getPosition().getX();
         float dy = position.getY() - otherPlayer.getPosition().getY();
         float distance = (float) Math.sqrt(dx * dx + dy * dy);
-        boolean collided = distance <= radius + otherPlayer.getRadius();
-//        if (collided)
-//            log.info("Player ID `{}` name `{}` collided with player ID `{}` name `{}`", id, name, otherPlayer.getId(), otherPlayer.getName());
-        return collided;
+        return distance <= radius + otherPlayer.getRadius();
     }
 
     public void ensurePlayerWithinBounds(int gridSize) {
@@ -127,6 +127,10 @@ public class Player {
         position.y = y;
     }
 
+    public void setPositionY(float y) {
+        position.y = y;
+    }
+
     @Data
     public static class Position {
         private float x;
@@ -139,6 +143,14 @@ public class Player {
         private Position(float x, float y) {
             this.x = x;
             this.y = y;
+        }
+
+        @Override
+        public String toString() {
+            return "{" +
+                    "x=" + x +
+                    ", y=" + y +
+                    '}';
         }
     }
 
@@ -154,5 +166,18 @@ public class Player {
     @Override
     public int hashCode() {
         return id;
+    }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", position=" + position +
+                ", direction=" + direction +
+                ", main=" + main +
+                ", unity=" + unity +
+                ", moveDirection=" + moveDirection +
+                '}';
     }
 }

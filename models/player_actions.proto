@@ -24,6 +24,7 @@ message Join {
   string name = 2;
   float x = 3;
   float y = 4;
+  bool unity = 5;
 }
 
 message Move {

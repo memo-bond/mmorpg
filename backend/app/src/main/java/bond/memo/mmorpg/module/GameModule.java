@@ -21,6 +21,7 @@ import java.io.InputStream;
 import static bond.memo.mmorpg.constants.Constants.CELL_SIZE;
 import static bond.memo.mmorpg.constants.Constants.GRID_SIZE;
 import static bond.memo.mmorpg.constants.Constants.RADIUS;
+import static bond.memo.mmorpg.converter.GridHeightConverter.unityToAoiY;
 
 @Slf4j
 public class GameModule extends AbstractModule {
@@ -70,7 +71,7 @@ public class GameModule extends AbstractModule {
     @Singleton
     private Player provideMainPlayer() {
         return Player.builder()
-                .id(123456).name("Louis").position(Player.Position.from(430, 375))
+                .id(123456).name("Louis").position(Player.Position.from(430, 625))
                 .speed(200).radius(RADIUS).direction(200)
                 .color(Color.RED)
                 .build();

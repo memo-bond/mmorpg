@@ -20,7 +20,7 @@ class ClientJoinHandler implements Runnable {
         this.queue = queue;
     }
 
-    public void addQueuePlayer(Player player) {
+    public void addPlayer(Player player) {
         this.queue.add(player);
     }
 

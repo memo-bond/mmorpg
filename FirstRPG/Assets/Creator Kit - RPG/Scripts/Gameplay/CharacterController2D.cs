@@ -87,7 +87,8 @@ namespace RPGM.Gameplay
                         Id = id,
                         Name = "Lucas",
                         X = transform.position.x,
-                        Y = transform.position.y
+                        Y = transform.position.y,
+                        Unity = true
                     }
                 };
                 StartCoroutine(SendJoinMsg(msg));

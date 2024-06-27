@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static bond.memo.mmorpg.constants.Constants.RADIUS;
+import static bond.memo.mmorpg.converter.GridHeightConverter.aoiToUnityY;
+import static bond.memo.mmorpg.converter.GridHeightConverter.unityToAoiY;
 
 @Slf4j
 public class AOIVisualizer extends JPanel {
@@ -53,7 +55,7 @@ public class AOIVisualizer extends JPanel {
         new Thread(clientMoveHandler).start();
 
         aoiSystem.addPlayer(mainPlayer);
-        clientJoinHandler.addQueuePlayer(mainPlayer);
+        clientJoinHandler.addPlayer(mainPlayer);
 
         setPreferredSize(new Dimension(gridSize, gridSize));
         Timer timer = new Timer(2000, e -> {
@@ -74,15 +76,18 @@ public class AOIVisualizer extends JPanel {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         // Add example players
-        Player p1 = PlayerService.nextPlayer();
-        Player p2 = PlayerService.nextPlayer();
-        p1.setSpeed(50);
-        p2.setSpeed(100);
-        aoiSystem.addPlayer(p1);
-        aoiSystem.addPlayer(p2);
 
-        clientJoinHandler.addQueuePlayer(p1);
-        clientJoinHandler.addQueuePlayer(p2);
+//        Player p1 = PlayerService.nextPlayer();
+//        Player p2 = PlayerService.nextPlayer();
+//        p1.setSpeed(50);
+//        p2.setSpeed(100);
+//        p1.setPosition(Player.Position.from(p1.getPosition().getX(), unityToAoiY(p1.getPosition().getY())));
+//        p2.setPosition(Player.Position.from(p2.getPosition().getX(), unityToAoiY(p2.getPosition().getY())));
+//        aoiSystem.addPlayer(p1);
+//        aoiSystem.addPlayer(p2);
+//
+//        clientJoinHandler.addPlayer(p1);
+//        clientJoinHandler.addPlayer(p2);
 
         frame.add(this);
         frame.pack();
@@ -136,7 +141,7 @@ public class AOIVisualizer extends JPanel {
 
     private void move(Player p, float x, float y) {
         p.setPosition(Player.Position.from(x, y));
-        clientMoveHandler.move(p.moveMsg());
+        clientMoveHandler.move(p.moveMsg(p.getPosition().getY()));
     }
 
     private void updatePlayerPositions() {
@@ -148,7 +153,7 @@ public class AOIVisualizer extends JPanel {
                         continue;
                     }
                     movePlayer(player);
-                    updatePlayerCell(player, cell);
+//                    updatePlayerCell(player, cell);
                     handlePlayerCollisions(player);
                 }
             }
@@ -161,19 +166,7 @@ public class AOIVisualizer extends JPanel {
 
         if (p.isPlayerOutOfBounds(gridSize))
             p.setDirection(MyRandomizer.random().nextFloat() * 360);
-        clientMoveHandler.move(p.moveMsg());
-    }
-
-    private void updatePlayerCell(Player player, GridCell cell) {
-        int newCellX = (int) Math.floor(player.getPosition().getX() / cellSize);
-        int newCellY = (int) Math.floor(player.getPosition().getY() / cellSize);
-        int oldCellX = aoiSystem.getCellIndex(player.getPosition().getX() - player.getSpeed() * 0.1f * (float) Math.cos(Math.toRadians(player.getDirection())));
-        int oldCellY = aoiSystem.getCellIndex(player.getPosition().getY() - player.getSpeed() * 0.1f * (float) Math.sin(Math.toRadians(player.getDirection())));
-
-        if (newCellX != oldCellX || newCellY != oldCellY) {
-            cell.getPlayers().remove(player);
-            aoiSystem.addPlayer(player);
-        }
+        clientMoveHandler.move(p.moveMsg(unityToAoiY(p.getPosition().getY())));
     }
 
     private void handlePlayerCollisions(Player player) {
@@ -198,7 +191,7 @@ public class AOIVisualizer extends JPanel {
         player.position(e.getX(), e.getY());
         aoiSystem.addPlayer(player);
         players.add(player);
-        clientJoinHandler.addQueuePlayer(player);
+        clientJoinHandler.addPlayer(player);
         repaint(); // Redraw the grid with the new player and AOI
     }
 
@@ -211,29 +204,16 @@ public class AOIVisualizer extends JPanel {
 
     private void drawPlayers(Graphics g) {
 
-        for (Player player : aoiSystem.getPlayerMap().values()) {
+        for (Player player : aoiSystem.getPlayers()) {
             g.setColor(player.getColor());
+            float radius = player.getRadius();
             int x = (int) player.getPosition().getX();
             int y = (int) player.getPosition().getY();
             g.fillOval(x - 5, y - 5, 10, 10); // Draw player as a small circle
-            g.drawOval(x - (int) player.getRadius(), y - (int) player.getRadius(),
-                    (int) player.getRadius() * 2, (int) player.getRadius() * 2); // Draw player's radius
+            g.drawOval(x - (int) radius, y - (int) radius,
+                    (int) radius * 2, (int) radius * 2); // Draw player's radius
             g.drawString(player.getName(), (int) (x - RADIUS), (int) (y - RADIUS));
         }
-
-//        for (Map<Integer, GridCell> column : aoiSystem.getGrid().values()) {
-//            for (GridCell cell : column.values()) {
-//                for (Player player : cell.getPlayers()) {
-//                    g.setColor(player.getColor());
-//                    int x = (int) player.getPosition().getX();
-//                    int y = (int) player.getPosition().getY();
-//                    g.fillOval(x - 5, y - 5, 10, 10); // Draw player as a small circle
-//                    g.drawOval(x - (int) player.getRadius(), y - (int) player.getRadius(),
-//                            (int) player.getRadius() * 2, (int) player.getRadius() * 2); // Draw player's radius
-//                    g.drawString(player.getName(), (int) (x - RADIUS), (int) (y - RADIUS));
-//                }
-//            }
-//        }
     }
 
     private void drawGrid(Graphics g) {
