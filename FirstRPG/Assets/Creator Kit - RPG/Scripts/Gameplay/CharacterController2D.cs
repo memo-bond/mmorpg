@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using Creator_Kit___RPG.Scripts.Connection;
-using Creator_Kit___RPG.Scripts.Gameplay;
 using NativeWebSocket;
 using UnityEngine;
 using UnityEngine.U2D;
@@ -88,7 +87,8 @@ namespace RPGM.Gameplay
                         Id = id,
                         Name = "Lucas",
                         X = transform.position.x,
-                        Y = transform.position.y
+                        Y = transform.position.y,
+                        Unity = true
                     }
                 };
                 StartCoroutine(SendJoinMsg(msg));

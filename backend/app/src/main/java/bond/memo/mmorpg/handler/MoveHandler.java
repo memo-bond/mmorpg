@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static bond.memo.mmorpg.converter.GridHeightConverter.aoiToUnityY;
+import static bond.memo.mmorpg.converter.GridHeightConverter.unityToAoiY;
 import static bond.memo.mmorpg.utils.ByteUtils.protoMsgToBytes;
 
 @Slf4j
@@ -28,11 +29,17 @@ public class MoveHandler extends BaseHandler<PlayerActions.Move> implements Hand
     public void handle(ChannelHandlerContext ctx) {
         if (msg instanceof PlayerActions.Move move) {
             Player player = aoiSystem.getPlayerById(move.getId());
-            if (player != null && (player.isMain() || player.getId() == 123456)) {
+            if (player == null) {
+                log.warn("This player `{}` is not join & initial properly - so it is null", move.getId());
+                return;
+            }
+            int id = player.getId();
+            if (player.isMain() || id == 123456) {
                 log.info("MOVE action player `{}`", player);
             }
-            Objects.requireNonNull(player, "player is null - check player join");
-            player.move(move.getX(), move.getY(), move.getDirection().ordinal());
+            player.move(move.getX(),
+                    player.isUnity() ? unityToAoiY(move.getY()) : move.getY(),
+                    move.getDirection().ordinal());
             aoiSystem.movePlayer(player);
             broadcastMove(player);
             response(ctx);
@@ -52,10 +59,15 @@ public class MoveHandler extends BaseHandler<PlayerActions.Move> implements Hand
         }
 
         for (Player otherPlayer : otherPlayers) {
-            if (otherPlayer.getId() != player.getId() && otherPlayer.getChannel() != null) {
+            if (otherPlayer.getId() == player.getId()) continue; // exclude current player
+            if (otherPlayer.getChannel() != null) {
                 log.info("broadcast move {}, direction {}", player.moveMsg(aoiToUnityY(player.getPosition().getY())), player.calcDirection());
                 otherPlayer.getChannel()
-                        .writeAndFlush(protoMsgToBytes(player.moveMsg(aoiToUnityY(player.getPosition().getY()))))
+                        .writeAndFlush(protoMsgToBytes(player.moveMsg(
+                                otherPlayer.isUnity()
+                                        ? aoiToUnityY(player.getPosition().getY())
+                                        : player.getPosition().getY()
+                        )))
                         .addListener((ChannelFutureListener) future -> {
                             if (!future.isSuccess()) {
                                 log.error("Failed to send move message to player ID {}, {}", otherPlayer.getId(), future.cause().getStackTrace());

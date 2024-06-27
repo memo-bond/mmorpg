@@ -76,17 +76,18 @@ public class AOIVisualizer extends JPanel {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         // Add example players
-        Player p1 = PlayerService.nextPlayer();
-        Player p2 = PlayerService.nextPlayer();
-        p1.setSpeed(50);
-        p2.setSpeed(100);
-        p1.setPosition(Player.Position.from(p1.getPosition().getX(), unityToAoiY(p1.getPosition().getY())));
-        p2.setPosition(Player.Position.from(p2.getPosition().getX(), unityToAoiY(p2.getPosition().getY())));
-        aoiSystem.addPlayer(p1);
-        aoiSystem.addPlayer(p2);
 
-        clientJoinHandler.addPlayer(p1);
-        clientJoinHandler.addPlayer(p2);
+//        Player p1 = PlayerService.nextPlayer();
+//        Player p2 = PlayerService.nextPlayer();
+//        p1.setSpeed(50);
+//        p2.setSpeed(100);
+//        p1.setPosition(Player.Position.from(p1.getPosition().getX(), unityToAoiY(p1.getPosition().getY())));
+//        p2.setPosition(Player.Position.from(p2.getPosition().getX(), unityToAoiY(p2.getPosition().getY())));
+//        aoiSystem.addPlayer(p1);
+//        aoiSystem.addPlayer(p2);
+//
+//        clientJoinHandler.addPlayer(p1);
+//        clientJoinHandler.addPlayer(p2);
 
         frame.add(this);
         frame.pack();
@@ -116,12 +117,12 @@ public class AOIVisualizer extends JPanel {
 
             switch (key) {
                 case KeyEvent.VK_UP, KeyEvent.VK_W -> {
-                    p.setDirection(MoveDirection.DOWN.degree());
-                    move(p, p.getPosition().getX(), p.getPosition().getY() + moveAmount);
-                }
-                case KeyEvent.VK_DOWN, KeyEvent.VK_S -> {
                     p.setDirection(MoveDirection.UP.degree());
                     move(p, p.getPosition().getX(), p.getPosition().getY() - moveAmount);
+                }
+                case KeyEvent.VK_DOWN, KeyEvent.VK_S -> {
+                    p.setDirection(MoveDirection.DOWN.degree());
+                    move(p, p.getPosition().getX(), p.getPosition().getY() + moveAmount);
                 }
                 case KeyEvent.VK_LEFT, KeyEvent.VK_A -> {
                     p.setDirection(MoveDirection.LEFT.degree());
@@ -140,7 +141,7 @@ public class AOIVisualizer extends JPanel {
 
     private void move(Player p, float x, float y) {
         p.setPosition(Player.Position.from(x, y));
-        clientMoveHandler.move(p.moveMsg(unityToAoiY(p.getPosition().getY())));
+        clientMoveHandler.move(p.moveMsg(p.getPosition().getY()));
     }
 
     private void updatePlayerPositions() {
@@ -207,7 +208,7 @@ public class AOIVisualizer extends JPanel {
             g.setColor(player.getColor());
             float radius = player.getRadius();
             int x = (int) player.getPosition().getX();
-            int y = (int) aoiToUnityY(player.getPosition().getY());
+            int y = (int) player.getPosition().getY();
             g.fillOval(x - 5, y - 5, 10, 10); // Draw player as a small circle
             g.drawOval(x - (int) radius, y - (int) radius,
                     (int) radius * 2, (int) radius * 2); // Draw player's radius

@@ -127,6 +127,10 @@ public class Player {
         position.y = y;
     }
 
+    public void setPositionY(float y) {
+        position.y = y;
+    }
+
     @Data
     public static class Position {
         private float x;
@@ -139,6 +143,14 @@ public class Player {
         private Position(float x, float y) {
             this.x = x;
             this.y = y;
+        }
+
+        @Override
+        public String toString() {
+            return "{" +
+                    "x=" + x +
+                    ", y=" + y +
+                    '}';
         }
     }
 
@@ -154,5 +166,18 @@ public class Player {
     @Override
     public int hashCode() {
         return id;
+    }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", position=" + position +
+                ", direction=" + direction +
+                ", main=" + main +
+                ", unity=" + unity +
+                ", moveDirection=" + moveDirection +
+                '}';
     }
 }

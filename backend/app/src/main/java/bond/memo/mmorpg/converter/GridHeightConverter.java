@@ -2,6 +2,7 @@ package bond.memo.mmorpg.converter;
 
 public final class GridHeightConverter {
     private static final int HEIGHT = 1000;
+
     private GridHeightConverter() {}
 
     public static int unityToAoiY(float unityY) {

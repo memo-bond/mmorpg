@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.awt.Color;
 
 import static bond.memo.mmorpg.constants.Constants.RADIUS;
+import static bond.memo.mmorpg.converter.GridHeightConverter.unityToAoiY;
 
 @Slf4j
 public class JoinHandler extends BaseHandler<PlayerActions.Join> implements Handler {
@@ -33,6 +34,7 @@ public class JoinHandler extends BaseHandler<PlayerActions.Join> implements Hand
             if (join.getUnity()) {
                 player.setUnity(Boolean.TRUE);
                 player.setMain(Boolean.TRUE);
+                player.setPositionY(unityToAoiY(join.getY()));
             }
             // temp condition for main player instead of bot
             if (join.getId() == 123456) // louis
