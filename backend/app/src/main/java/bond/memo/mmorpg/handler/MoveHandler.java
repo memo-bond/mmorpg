@@ -28,11 +28,12 @@ public class MoveHandler extends BaseHandler<PlayerActions.Move> implements Hand
     public void handle(ChannelHandlerContext ctx) {
         if (msg instanceof PlayerActions.Move move) {
             Player player = aoiSystem.getPlayerById(move.getId());
-            if (player != null && player.isMain()) {
+            if (player != null && (player.isMain() || player.getId() == 123456)) {
                 log.info("MOVE action player `{}`", player);
             }
             Objects.requireNonNull(player, "player is null - check player join");
             player.move(move.getX(), move.getY(), move.getDirection().ordinal());
+            aoiSystem.movePlayer(player);
             broadcastMove(player);
             response(ctx);
         }
@@ -53,8 +54,8 @@ public class MoveHandler extends BaseHandler<PlayerActions.Move> implements Hand
         for (Player otherPlayer : otherPlayers) {
             if (otherPlayer.getId() != player.getId() && otherPlayer.getChannel() != null) {
                 log.info("broadcast move {}, direction {}", player.moveMsg(aoiToUnityY(player.getPosition().getY())), player.calcDirection());
-                otherPlayer.getChannel().writeAndFlush(
-                                protoMsgToBytes(player.moveMsg(aoiToUnityY(player.getPosition().getY()))))
+                otherPlayer.getChannel()
+                        .writeAndFlush(protoMsgToBytes(player.moveMsg(aoiToUnityY(player.getPosition().getY()))))
                         .addListener((ChannelFutureListener) future -> {
                             if (!future.isSuccess()) {
                                 log.error("Failed to send move message to player ID {}, {}", otherPlayer.getId(), future.cause().getStackTrace());

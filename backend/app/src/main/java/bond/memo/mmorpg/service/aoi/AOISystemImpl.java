@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,13 +35,23 @@ public class AOISystemImpl extends BaseAOISystem {
     }
 
     public void addPlayer(Player player) {
+        move(player);
+        log.info("Add player to Map {}", player);
+        playerMap.put(player.getId(), player);
+    }
+
+    private void move(Player player) {
         int column = getCellIndex(player.getPosition().getX());
         int row = getCellIndex(player.getPosition().getY());
-        log.info("Add player column `{}` row `{}`", column, row);
+        log.debug("Player name `{}` move to column {} row {}", player.getName(), column, row);
         grid.computeIfAbsent(column, k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(row, k -> new GridCell())
                 .getPlayers().add(player.getId());
-        playerMap.put(player.getId(), player);
+    }
+
+    @Override
+    public void movePlayer(Player player) {
+        move(player);
     }
 
     @Override

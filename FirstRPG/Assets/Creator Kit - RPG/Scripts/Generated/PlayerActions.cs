@@ -25,19 +25,20 @@ public static partial class PlayerActionsReflection {
           "ChRwbGF5ZXJfYWN0aW9ucy5wcm90byKWAQoNUGxheWVyTWVzc2FnZRIVCgRq",
           "b2luGAEgASgLMgUuSm9pbkgAEhUKBG1vdmUYAiABKAsyBS5Nb3ZlSAASFQoE",
           "cXVpdBgDIAEoCzIFLlF1aXRIABIXCgVsZWF2ZRgEIAEoCzIGLkxlYXZlSAAS",
-          "HQoIcmVzcG9uc2UYBSABKAsyCS5SZXNwb25zZUgAQggKBmFjdGlvbiI2CgRK",
+          "HQoIcmVzcG9uc2UYBSABKAsyCS5SZXNwb25zZUgAQggKBmFjdGlvbiJFCgRK",
           "b2luEgoKAmlkGAEgASgNEgwKBG5hbWUYAiABKAkSCQoBeBgDIAEoAhIJCgF5",
-          "GAQgASgCIlkKBE1vdmUSCgoCaWQYASABKA0SDAoEbmFtZRgCIAEoCRIJCgF4",
-          "GAMgASgCEgkKAXkYBCABKAISIQoJZGlyZWN0aW9uGAUgASgOMg4uTW92ZURp",
-          "cmVjdGlvbiISCgRRdWl0EgoKAmlkGAEgASgNIhMKBUxlYXZlEgoKAmlkGAEg",
-          "ASgNIhsKCFJlc3BvbnNlEg8KB3N1Y2Nlc3MYASABKAgqNgoNTW92ZURpcmVj",
-          "dGlvbhIICgRMRUZUEAASCQoFUklHSFQQARIGCgJVUBACEggKBERPV04QA0IZ",
-          "Chdib25kLm1lbW8ubW1vcnBnLm1vZGVsc2IGcHJvdG8z"));
+          "GAQgASgCEg0KBXVuaXR5GAUgASgIIlkKBE1vdmUSCgoCaWQYASABKA0SDAoE",
+          "bmFtZRgCIAEoCRIJCgF4GAMgASgCEgkKAXkYBCABKAISIQoJZGlyZWN0aW9u",
+          "GAUgASgOMg4uTW92ZURpcmVjdGlvbiISCgRRdWl0EgoKAmlkGAEgASgNIhMK",
+          "BUxlYXZlEgoKAmlkGAEgASgNIhsKCFJlc3BvbnNlEg8KB3N1Y2Nlc3MYASAB",
+          "KAgqNgoNTW92ZURpcmVjdGlvbhIICgRMRUZUEAASCQoFUklHSFQQARIGCgJV",
+          "UBACEggKBERPV04QA0IZChdib25kLm1lbW8ubW1vcnBnLm1vZGVsc2IGcHJv",
+          "dG8z"));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(new[] {typeof(global::MoveDirection), }, null, new pbr::GeneratedClrTypeInfo[] {
           new pbr::GeneratedClrTypeInfo(typeof(global::PlayerMessage), global::PlayerMessage.Parser, new[]{ "Join", "Move", "Quit", "Leave", "Response" }, new[]{ "Action" }, null, null, null),
-          new pbr::GeneratedClrTypeInfo(typeof(global::Join), global::Join.Parser, new[]{ "Id", "Name", "X", "Y" }, null, null, null, null),
+          new pbr::GeneratedClrTypeInfo(typeof(global::Join), global::Join.Parser, new[]{ "Id", "Name", "X", "Y", "Unity" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::Move), global::Move.Parser, new[]{ "Id", "Name", "X", "Y", "Direction" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::Quit), global::Quit.Parser, new[]{ "Id" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::Leave), global::Leave.Parser, new[]{ "Id" }, null, null, null, null),
@@ -550,6 +551,7 @@ public sealed partial class Join : pb::IMessage<Join>
     name_ = other.name_;
     x_ = other.x_;
     y_ = other.y_;
+    unity_ = other.unity_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -607,6 +609,18 @@ public sealed partial class Join : pb::IMessage<Join>
     }
   }
 
+  /// <summary>Field number for the "unity" field.</summary>
+  public const int UnityFieldNumber = 5;
+  private bool unity_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public bool Unity {
+    get { return unity_; }
+    set {
+      unity_ = value;
+    }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -626,6 +640,7 @@ public sealed partial class Join : pb::IMessage<Join>
     if (Name != other.Name) return false;
     if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(X, other.X)) return false;
     if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Y, other.Y)) return false;
+    if (Unity != other.Unity) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -637,6 +652,7 @@ public sealed partial class Join : pb::IMessage<Join>
     if (Name.Length != 0) hash ^= Name.GetHashCode();
     if (X != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(X);
     if (Y != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Y);
+    if (Unity != false) hash ^= Unity.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -671,6 +687,10 @@ public sealed partial class Join : pb::IMessage<Join>
       output.WriteRawTag(37);
       output.WriteFloat(Y);
     }
+    if (Unity != false) {
+      output.WriteRawTag(40);
+      output.WriteBool(Unity);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -697,6 +717,10 @@ public sealed partial class Join : pb::IMessage<Join>
       output.WriteRawTag(37);
       output.WriteFloat(Y);
     }
+    if (Unity != false) {
+      output.WriteRawTag(40);
+      output.WriteBool(Unity);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -718,6 +742,9 @@ public sealed partial class Join : pb::IMessage<Join>
     }
     if (Y != 0F) {
       size += 1 + 4;
+    }
+    if (Unity != false) {
+      size += 1 + 1;
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -742,6 +769,9 @@ public sealed partial class Join : pb::IMessage<Join>
     }
     if (other.Y != 0F) {
       Y = other.Y;
+    }
+    if (other.Unity != false) {
+      Unity = other.Unity;
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -778,6 +808,10 @@ public sealed partial class Join : pb::IMessage<Join>
           Y = input.ReadFloat();
           break;
         }
+        case 40: {
+          Unity = input.ReadBool();
+          break;
+        }
       }
     }
   #endif
@@ -811,6 +845,10 @@ public sealed partial class Join : pb::IMessage<Join>
         }
         case 37: {
           Y = input.ReadFloat();
+          break;
+        }
+        case 40: {
+          Unity = input.ReadBool();
           break;
         }
       }

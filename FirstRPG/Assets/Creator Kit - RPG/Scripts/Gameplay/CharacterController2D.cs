@@ -163,7 +163,7 @@ namespace RPGM.Gameplay
                 {
                     Id = id,
                     X = transform.position.x,
-                    Y = CoordinateConverter.UnityToAoiY(transform.position.y)
+                    Y = transform.position.y
                 }
             };
 

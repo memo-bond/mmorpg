@@ -28,4 +28,6 @@ public interface AOISystem {
     int getGridSize();
 
     int getCellSize();
+
+    void movePlayer(Player player);
 }

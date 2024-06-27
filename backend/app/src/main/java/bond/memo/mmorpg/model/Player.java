@@ -25,12 +25,14 @@ public class Player {
     private boolean main;
     private Channel channel;
     private MoveDirection moveDirection;
+    private boolean unity;
 
     public Player() {
     }
 
     public Player(int id, String name, Position position, float direction,
-                  float speed, float radius, Color color, boolean main, Channel channel, MoveDirection moveDirection) {
+                  float speed, float radius, Color color, boolean main, Channel channel,
+                  MoveDirection moveDirection, boolean unity) {
         this.id = id;
         this.name = name;
         this.position = position;
@@ -41,6 +43,7 @@ public class Player {
         this.main = main;
         this.channel = channel;
         this.moveDirection = MoveDirection.DOWN;
+        this.unity = unity;
     }
 
     public PlayerActions.PlayerMessage moveMsg(float y) {
@@ -99,10 +102,7 @@ public class Player {
         float dx = position.getX() - otherPlayer.getPosition().getX();
         float dy = position.getY() - otherPlayer.getPosition().getY();
         float distance = (float) Math.sqrt(dx * dx + dy * dy);
-        boolean collided = distance <= radius + otherPlayer.getRadius();
-//        if (collided)
-//            log.info("Player ID `{}` name `{}` collided with player ID `{}` name `{}`", id, name, otherPlayer.getId(), otherPlayer.getName());
-        return collided;
+        return distance <= radius + otherPlayer.getRadius();
     }
 
     public void ensurePlayerWithinBounds(int gridSize) {
