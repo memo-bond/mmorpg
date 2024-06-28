@@ -133,6 +133,17 @@ namespace RPGM.Gameplay
                 nextMoveCommand = Vector3.zero;
                 state = State.Moving;
             }
+            else
+            {
+                rigidbody2D.velocity = Vector2.zero; // Stop the slipping
+                UpdateAnimator(Vector3.zero); // Reset animator parameters
+            }
+        }
+
+        public void MovePlayer(Vector3 nextMove)
+        {
+            Debug.Log($"nextMove {nextMove}");
+            nextMoveCommand = nextMove;
         }
 
         private void MoveState()
@@ -142,14 +153,29 @@ namespace RPGM.Gameplay
             rigidbody2D.velocity = Vector2.SmoothDamp(rigidbody2D.velocity,
                 nextMoveCommand * speed, ref currentVelocity, acceleration, speed);
             spriteRenderer.flipX = rigidbody2D.velocity.x >= 0 ? true : false;
-
-            if (!online) return; // guard
-            if (!(Vector3.Distance(transform.position, lastPosition) > positionUpdateThreshold)) return; // guard
-            if (!main)
+            
+            Debug.Log($"Player id `{id}` name `{name}` nextMoveCommand `{nextMoveCommand}`");
+            
+            // Check if the character has stopped moving
+            // if (rigidbody2D.velocity.magnitude < 0.1f)
+            // {
+            //     state = State.Idle;
+            //     UpdateAnimator(Vector3.zero); // Reset animator parameters
+            //     return;
+            // }
+            
+            if (Vector3.Distance(transform.position, end) < 0.1f)
             {
                 nextMoveCommand = Vector3.zero;
+                state = State.Idle;
+                UpdateAnimator(Vector3.zero); // Reset animator parameters
                 return;
             }
+            
+            if (!online
+                || !(Vector3.Distance(transform.position, lastPosition) > positionUpdateThreshold)
+                || !main) return; // guard
+
             Debug.Log($"nextMoveCommand {nextMoveCommand}");
             SendMoveMsg();
             lastPosition = transform.position;
@@ -175,8 +201,11 @@ namespace RPGM.Gameplay
         {
             if (animator)
             {
-                animator.SetInteger("WalkX", direction.x < 0 ? -1 : direction.x > 0 ? 1 : 0);
-                animator.SetInteger("WalkY", direction.y < 0 ? 1 : direction.y > 0 ? -1 : 0);
+                int walkX = direction.x < 0 ? -1 : direction.x > 0 ? 1 : 0;
+                int walkY = direction.y < 0 ? 1 : direction.y > 0 ? -1 : 0;
+
+                animator.SetInteger("WalkX", walkX);
+                animator.SetInteger("WalkY", walkY);
             }
         }
 

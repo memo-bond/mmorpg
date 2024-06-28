@@ -35,21 +35,21 @@ namespace Creator_Kit___RPG.Scripts.PlayerManager
         {
             if (players.TryGetValue(move.Id, out CharacterController2D player))
             {
-                player.transform.position = new Vector3(move.X, move.Y, 0);
                 Debug.Log($"move.Direction {move.Direction}");
+                float moveSpeed = 1.0f;
                 switch (move.Direction)
                 {
                     case MoveDirection.Left:
-                        player.nextMoveCommand = new Vector3(-0.1f, 0, 0);
+                        player.MovePlayer(new Vector3(-moveSpeed * Time.deltaTime, 0, 0));
                         break;
                     case MoveDirection.Right:
-                        player.nextMoveCommand = new Vector3(0.1f, 0, 0);
+                        player.MovePlayer(new Vector3(moveSpeed * Time.deltaTime, 0, 0));
                         break;
                     case MoveDirection.Up:
-                        player.nextMoveCommand = new Vector3(0, 0.1f, 0);
+                        player.MovePlayer(new Vector3(0, moveSpeed * Time.deltaTime, 0));
                         break;
                     case MoveDirection.Down:
-                        player.nextMoveCommand = new Vector3(0, -0.1f, 0);
+                        player.MovePlayer(new Vector3(0, -moveSpeed * Time.deltaTime, 0));
                         break;
                 }
             }
