@@ -2,7 +2,7 @@ using RPGM.Core;
 using RPGM.Gameplay;
 using UnityEngine;
 
-namespace RPGM.UI
+namespace Creator_Kit___RPG.Scripts.Gameplay
 {
     /// <summary>
     /// Sends user input to the correct control systems.
@@ -10,7 +10,7 @@ namespace RPGM.UI
     public class InputController : MonoBehaviour
     {
         public float stepSize = 0.1f;
-        GameModel model = Schedule.GetModel<GameModel>();
+        [SerializeField] private GameModel model = Schedule.GetModel<GameModel>();
 
         public enum State
         {

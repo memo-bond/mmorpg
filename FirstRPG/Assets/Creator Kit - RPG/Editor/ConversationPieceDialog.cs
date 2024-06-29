@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Creator_Kit___RPG.Scripts.Gameplay;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;

@@ -1,3 +1,5 @@
+using Creator_Kit___RPG.Scripts.Core;
+using Creator_Kit___RPG.Scripts.Gameplay;
 using RPGM.Core;
 using RPGM.Gameplay;
 

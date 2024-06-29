@@ -33,10 +33,6 @@ public class MoveHandler extends BaseHandler<PlayerActions.Move> implements Hand
                 log.warn("This player `{}` is not join & initial properly - so it is null", move.getId());
                 return;
             }
-            int id = player.getId();
-            if (player.isMain() || id == 123456) {
-                log.info("MOVE action player `{}`", player);
-            }
             player.move(move.getX(),
                     player.isUnity() ? unityToAoiY(move.getY()) : move.getY(),
                     move.getDirection().ordinal());
@@ -61,7 +57,7 @@ public class MoveHandler extends BaseHandler<PlayerActions.Move> implements Hand
         for (Player otherPlayer : otherPlayers) {
             if (otherPlayer.getId() == player.getId()) continue; // exclude current player
             if (otherPlayer.getChannel() != null) {
-                log.info("broadcast move {}, direction {}", player.moveMsg(aoiToUnityY(player.getPosition().getY())), player.calcDirection());
+//                log.info("broadcast move {}", player.moveMsg(aoiToUnityY(player.getPosition().getY())));
                 otherPlayer.getChannel()
                         .writeAndFlush(protoMsgToBytes(player.moveMsg(
                                 otherPlayer.isUnity()

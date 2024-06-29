@@ -1,79 +1,72 @@
 using System;
 using System.Collections.Generic;
-using Google.Protobuf;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
-public class EventManager : MonoBehaviour
+namespace Creator_Kit___RPG.Scripts.Core
 {
-    private static EventManager instance;
-
-    private Dictionary<string, Action<IMessage>> eventDictionary;
-
-    public static EventManager Instance
+    public class EventManager : MonoBehaviour
     {
-        get
+        private static EventManager _instance;
+
+        private Dictionary<EventName, Action<Object>> _eventDictionary;
+
+        private static EventManager Instance
         {
-            if (!instance)
+            get
             {
-                instance = FindObjectOfType<EventManager>();
-                if (!instance)
+                if (_instance) return _instance;
+                _instance = FindObjectOfType<EventManager>();
+                if (!_instance)
                 {
-                    GameObject obj = new GameObject("EventManager");
-                    instance = obj.AddComponent<EventManager>();
+                    var obj = new GameObject("EventManager");
+                    _instance = obj.AddComponent<EventManager>();
                 }
-                instance.Init();
+
+                _instance.Init();
+                return _instance;
             }
-            return instance;
         }
-    }
 
-    private void Init()
-    {
-        if (eventDictionary == null)
+        private void Init()
         {
-            eventDictionary = new Dictionary<string, Action<IMessage>>();
+            _eventDictionary ??= new Dictionary<EventName, Action<Object>>();
         }
-    }
 
-    public static void StartListening(string eventName, Action<IMessage> listener)
-    {
-        Action<IMessage> thisEvent;
-        if (Instance.eventDictionary.TryGetValue(eventName, out thisEvent))
+        public static void StartListening(EventName eventName, Action<Object> listener)
         {
-            thisEvent += listener;
-            Instance.eventDictionary[eventName] = thisEvent;
-        }
-        else
-        {
-            thisEvent += listener;
-            Instance.eventDictionary.Add(eventName, thisEvent);
-        }
-    }
-
-    public static void StopListening(string eventName, Action<IMessage> listener)
-    {
-        if (instance == null) return;
-        Action<IMessage> thisEvent;
-        if (Instance.eventDictionary.TryGetValue(eventName, out thisEvent))
-        {
-            thisEvent -= listener;
-            if (thisEvent == null)
+            if (Instance._eventDictionary.TryGetValue(eventName, out var thisEvent))
             {
-                Instance.eventDictionary.Remove(eventName);
+                thisEvent += listener;
+                Instance._eventDictionary[eventName] = thisEvent;
             }
             else
             {
-                Instance.eventDictionary[eventName] = thisEvent;
+                thisEvent += listener;
+                Instance._eventDictionary.Add(eventName, thisEvent);
             }
         }
-    }
 
-    public static void TriggerEvent(string eventName, IMessage eventParam = null)
-    {
-        Action<IMessage> thisEvent;
-        if (Instance.eventDictionary.TryGetValue(eventName, out thisEvent))
+        public static void StopListening(EventName eventName, Action<Object> listener)
         {
-            thisEvent.Invoke(eventParam);
+            if (!Instance._eventDictionary.TryGetValue(eventName, out var thisEvent)) return;
+            thisEvent -= listener;
+            if (thisEvent == null)
+            {
+                Instance._eventDictionary.Remove(eventName);
+            }
+            else
+            {
+                Instance._eventDictionary[eventName] = thisEvent;
+            }
+        }
+
+        public static void TriggerEvent(EventName eventName, Object eventParam)
+        {
+            if (Instance._eventDictionary.TryGetValue(eventName, out var thisEvent))
+            {
+                thisEvent.Invoke(eventParam);
+            }
         }
     }
 }

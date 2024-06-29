@@ -1,13 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using Creator_Kit___RPG.Scripts.Gameplay;
+using RPGM.Core;
 using RPGM.Gameplay;
 
-namespace RPGM.Core
+namespace Creator_Kit___RPG.Scripts.Core
 {
     /// <summary>
     /// An event allows execution of some logic to be deferred for a period of time.
     /// </summary>
     /// <typeparam name="Event"></typeparam>
-    public abstract class Event : System.IComparable<Event>
+    public abstract class Event : IComparable<Event>
     {
         public virtual void Execute() { }
 
@@ -34,7 +36,7 @@ namespace RPGM.Core
     /// <typeparam name="T"></typeparam>
     public abstract class Event<T> : Event where T : Event<T>
     {
-        public static System.Action<T> OnExecute;
+        public static Action<T> OnExecute;
 
         internal override void ExecuteEvent()
         {

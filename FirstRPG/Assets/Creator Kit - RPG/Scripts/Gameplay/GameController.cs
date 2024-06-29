@@ -1,8 +1,7 @@
-using UnityEngine;
 using RPGM.Core;
-using RPGM.Gameplay;
+using UnityEngine;
 
-namespace RPGM.Gameplay
+namespace Creator_Kit___RPG.Scripts.Gameplay
 {
     /// <summary>
     /// The global game controller. It contains the game model and executes the schedule.
