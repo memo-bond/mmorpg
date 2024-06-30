@@ -114,7 +114,7 @@ public class AOIVisualizer extends JPanel {
         if (mainPlayer != null) {
             Player p = mainPlayer;
             int key = e.getKeyCode();
-            float moveAmount = 0.2f;
+            float moveAmount = 0.1f;
 
             switch (key) {
                 case KeyEvent.VK_UP, KeyEvent.VK_W -> {

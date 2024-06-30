@@ -6,7 +6,7 @@ namespace Creator_Kit___RPG.Scripts.Character
     public class BasePlayer : MonoBehaviour
     {
         [SerializeField] protected float speed = 1;
-        [SerializeField] private float acceleration = 2;
+        [SerializeField] protected float acceleration = 2;
         [SerializeField] public Vector3 nextMoveCommand;
         [SerializeField] protected Animator animator;
         [SerializeField] private bool flipX = false;
@@ -99,15 +99,15 @@ namespace Creator_Kit___RPG.Scripts.Character
             
             start = transform.position;
             end = start + nextMoveCommand;
-            distance = (end - start).magnitude;
             
-            if (!(Vector3.Distance(transform.position, end) < positionUpdateThreshold)) return;
+            if (!(Vector3.Distance(start, end) < positionUpdateThreshold)) return;
+            Debug.Log("Reset state to IDLE");
             state = State.Idle;
             nextMoveCommand = Vector3.zero;
             rigidbody2D.velocity = Vector2.zero;
         }
 
-        private void UpdateAnimator(Vector3 direction)
+        protected void UpdateAnimator(Vector3 direction)
         {
             if (!animator) return;
             var walkX = direction.x < 0 ? -1 : direction.x > 0 ? 1 : 0;
