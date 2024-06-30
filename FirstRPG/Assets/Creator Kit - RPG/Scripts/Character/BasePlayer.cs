@@ -3,9 +3,9 @@ using UnityEngine.U2D;
 
 namespace Creator_Kit___RPG.Scripts.Character
 {
-    public class BaseCharacter : MonoBehaviour
+    public class BasePlayer : MonoBehaviour
     {
-        [SerializeField] private float speed = 1;
+        [SerializeField] protected float speed = 1;
         [SerializeField] private float acceleration = 2;
         [SerializeField] public Vector3 nextMoveCommand;
         [SerializeField] protected Animator animator;
@@ -16,7 +16,7 @@ namespace Creator_Kit___RPG.Scripts.Character
         protected PixelPerfectCamera pixelPerfectCamera;
 
         protected Vector3 lastPosition;
-        protected float positionUpdateThreshold = 0.2f;
+        protected float positionUpdateThreshold = 0.1f;
 
         protected enum State
         {
@@ -35,7 +35,6 @@ namespace Creator_Kit___RPG.Scripts.Character
 
         public uint Id { get; set; }
         public string Name { get; set; }
-        public bool Main { get; set; }
         public Vector3 Position { get; set; }
 
         protected virtual void Awake()
@@ -85,8 +84,8 @@ namespace Creator_Kit___RPG.Scripts.Character
             }
             else
             {
-                rigidbody2D.velocity = Vector2.zero; // Stop the slipping
-                UpdateAnimator(Vector3.zero); // Reset animator parameters
+                rigidbody2D.velocity = Vector2.zero;
+                UpdateAnimator(Vector3.zero);
             }
         }
 
@@ -97,9 +96,18 @@ namespace Creator_Kit___RPG.Scripts.Character
             rigidbody2D.velocity = Vector2.SmoothDamp(rigidbody2D.velocity,
                 nextMoveCommand * speed, ref currentVelocity, acceleration, speed);
             spriteRenderer.flipX = rigidbody2D.velocity.x >= 0;
+            
+            start = transform.position;
+            end = start + nextMoveCommand;
+            distance = (end - start).magnitude;
+            
+            if (!(Vector3.Distance(transform.position, end) < positionUpdateThreshold)) return;
+            state = State.Idle;
+            nextMoveCommand = Vector3.zero;
+            rigidbody2D.velocity = Vector2.zero;
         }
 
-        protected void UpdateAnimator(Vector3 direction)
+        private void UpdateAnimator(Vector3 direction)
         {
             if (!animator) return;
             var walkX = direction.x < 0 ? -1 : direction.x > 0 ? 1 : 0;
@@ -107,11 +115,6 @@ namespace Creator_Kit___RPG.Scripts.Character
 
             animator.SetInteger(WalkX, walkX);
             animator.SetInteger(WalkY, walkY);
-        }
-
-        public void MovePlayer(Vector3 nextMove)
-        {
-            nextMoveCommand = nextMove;
         }
     }
 }

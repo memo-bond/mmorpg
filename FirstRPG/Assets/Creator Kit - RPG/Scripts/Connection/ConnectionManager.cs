@@ -78,7 +78,7 @@ namespace Creator_Kit___RPG.Scripts.Connection
         {
             Debug.Log($"Player move {move.Id}-X={move.X}-Y={move.Y}");
 
-            if (playerManager.PlayerNotExists(move.Id))
+            if (playerManager.NotExists(move.Id))
             {
                 Join join = new()
                 {
@@ -88,12 +88,8 @@ namespace Creator_Kit___RPG.Scripts.Connection
                     Y = move.Y,
                     Unity = true
                 };
-                if (playerManager.AddPlayer(join))
-                {
-                    Debug.Log($"Player ID {move.Id} already added, update move only");
-                }
+                playerManager.AddPlayer(join);
             }
-
             playerManager.UpdatePlayerPosition(move);
         }
 

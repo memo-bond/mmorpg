@@ -13,7 +13,7 @@ namespace Creator_Kit___RPG.Scripts.Gameplay
     [Serializable]
     public class GameModel
     {
-        public MainCharacter player;
+        public MainPlayer player;
         public DialogController dialog;
         public InputController input;
         public InventoryController inventoryController;

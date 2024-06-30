@@ -10,7 +10,7 @@ namespace Creator_Kit___RPG.Scripts.Character
     /// <summary>
     /// A simple controller for animating a 4 directional sprite using Physics.
     /// </summary>
-    public class MainCharacter : BaseCharacter
+    public class MainPlayer : BasePlayer
     {
         [SerializeField] private bool online = false;
         [SerializeField] private ConnectionManager client;
@@ -98,6 +98,7 @@ namespace Creator_Kit___RPG.Scripts.Character
                     Id = Id
                 }
             };
+            Debug.Log($"Quit game {msg}");
             await client.Send(msg);
         }
     }

@@ -113,7 +113,7 @@ public class AOIVisualizer extends JPanel {
         if (mainPlayer != null) {
             Player p = mainPlayer;
             int key = e.getKeyCode();
-            float moveAmount = 0.1f;
+            float moveAmount = 0.2f;
 
             switch (key) {
                 case KeyEvent.VK_UP, KeyEvent.VK_W -> {
@@ -149,11 +149,10 @@ public class AOIVisualizer extends JPanel {
             for (GridCell cell : column.values()) {
                 for (Integer playerId : cell.getPlayers()) {
                     Player player = aoiSystem.getPlayerById(playerId);
-                    if (player == mainPlayer || player.isMain() || player.getId() == 123456) {
+                    if (player.isUnity() || player.getId() == 123456) {
                         continue;
                     }
                     movePlayer(player);
-//                    updatePlayerCell(player, cell);
                     handlePlayerCollisions(player);
                 }
             }
