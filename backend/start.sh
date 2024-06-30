@@ -1,0 +1,1 @@
+sudo docker run -p 8080:80 memo-game-server-app -d
