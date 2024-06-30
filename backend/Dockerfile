@@ -10,7 +10,7 @@ COPY gradle gradle
 # Copy the rest of the application source code
 COPY app/src app/src
 COPY app/build.gradle app/build.gradle
-COPY ../../models/proto /home/proto
+COPY ../models/proto/* /home/proto/
 COPY settings.gradle settings.gradle
   
   # Make the Gradle wrapper executable
