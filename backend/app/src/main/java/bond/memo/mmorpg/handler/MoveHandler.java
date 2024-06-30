@@ -5,8 +5,10 @@ import bond.memo.mmorpg.models.PlayerActions;
 import bond.memo.mmorpg.service.AOISystem;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Objects;
 import java.util.Set;
 
 import static bond.memo.mmorpg.converter.GridHeightConverter.aoiToUnityY;
@@ -45,36 +47,25 @@ public class MoveHandler extends BaseHandler<PlayerActions.Move> implements Hand
         Set<Player> otherPlayers = aoiSystem.getPlayersInAOI(player);
         if (otherPlayers.size() == 1) return;
 
-        if (!otherPlayers.isEmpty() && !otherPlayers.contains(player)) {
-            for (Player otherPlayer : otherPlayers) {
-                if (otherPlayer.getId() == 123456)
-                    log.info("broadcast move `{}`-`{}` to `{}`-`{}`",
-                            player.getId(), player.getName(), otherPlayer.getId(), otherPlayer.getName());
-            }
-        }
-
         for (Player otherPlayer : otherPlayers) {
             if (otherPlayer.getId() == player.getId()) continue; // exclude current player
-            if (otherPlayer.getChannel() != null) {
-                log.info("broadcast move {}", player.moveMsg(aoiToUnityY(player.getPosition().getY())));
-                try {
-                    otherPlayer.getChannel()
-                            .writeAndFlush(protoMsgToBytes(player.moveMsg(
-                                    otherPlayer.isUnity()
-                                            ? aoiToUnityY(player.getPosition().getY())
-                                            : player.getPosition().getY()
-                            )))
-                            .addListener((ChannelFutureListener) future -> {
-                                if (!future.isSuccess()) {
-                                    log.error("Failed to send move message to player ID {}, {}", otherPlayer.getId(), future.cause().getStackTrace());
-                                }
-                            });
-                } catch (Exception e) {
-                    log.error("broadcast move failed", e);
-                }
-
+            Objects.requireNonNull(otherPlayer.getChannel(), "Other player Id `" + otherPlayer.getId() + "` channel should not be null");
+            try {
+                BinaryWebSocketFrame data = protoMsgToBytes(player.moveMsg(
+                        otherPlayer.isUnity()
+                                ? aoiToUnityY(player.getPosition().getY())
+                                : player.getPosition().getY()
+                ));
+                otherPlayer.getChannel().writeAndFlush(data)
+                        .addListener((ChannelFutureListener) future -> {
+                            if (!future.isSuccess()) {
+                                log.error("Failed to send move message to player ID {}, {}", otherPlayer.getId(), future.cause().getStackTrace());
+                            }
+                        });
+            } catch (Exception e) {
+                log.error("broadcast move failed", e);
             }
+
         }
     }
-
 }
