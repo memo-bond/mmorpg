@@ -6,7 +6,7 @@ plugins {
 }
 
 ext {
-    protoPath = project.hasProperty('protoPath') ? project.protoPath : '../../models'
+    protoPath = project.hasProperty('protoPath') ? project.protoPath : '../../models/proto'
 }
 
 shadowJar {

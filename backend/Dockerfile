@@ -10,13 +10,14 @@ COPY gradle gradle
 # Copy the rest of the application source code
 COPY app/src app/src
 COPY app/build.gradle app/build.gradle
+COPY ../../models/proto /home/proto
 COPY settings.gradle settings.gradle
   
   # Make the Gradle wrapper executable
 RUN chmod +x gradlew
   
   # Build the application
-RUN gradle clean build
+RUN gradle clean build -PprotoPath=/home/proto
   
   # Use an official OpenJDK image to run the app
 FROM openjdk:21-jdk-slim
