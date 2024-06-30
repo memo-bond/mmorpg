@@ -5,8 +5,9 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
-sourceCompatibility = '21'
-targetCompatibility = '21'
+ext {
+    protoPath = project.hasProperty('protoPath') ? project.protoPath : '../../models'
+}
 
 shadowJar {
     manifest {
@@ -86,7 +87,7 @@ sourceSets {
             srcDirs = ['src/main/java', 'build/generated/source/proto/main/java']
         }
         proto {
-            srcDirs = ['../../models']
+            srcDirs = [protoPath]
         }
     }
 }
