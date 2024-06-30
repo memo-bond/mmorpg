@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Event = Creator_Kit___RPG.Scripts.Core.Event;
 
 
 namespace RPGM.Core

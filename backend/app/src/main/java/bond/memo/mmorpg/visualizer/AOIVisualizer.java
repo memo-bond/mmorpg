@@ -23,6 +23,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static bond.memo.mmorpg.constants.Constants.RADIUS;
@@ -149,11 +150,11 @@ public class AOIVisualizer extends JPanel {
             for (GridCell cell : column.values()) {
                 for (Integer playerId : cell.getPlayers()) {
                     Player player = aoiSystem.getPlayerById(playerId);
-                    if (player == mainPlayer || player.isMain() || player.getId() == 123456) {
+                    Objects.requireNonNull(player, "player id " + playerId + " is null when updatePlayerPositions");
+                    if (player.isUnity() || player.getId() == 123456) {
                         continue;
                     }
                     movePlayer(player);
-//                    updatePlayerCell(player, cell);
                     handlePlayerCollisions(player);
                 }
             }

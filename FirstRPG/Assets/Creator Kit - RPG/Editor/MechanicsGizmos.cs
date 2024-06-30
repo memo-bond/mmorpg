@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Creator_Kit___RPG.Scripts.Gameplay;
 using RPGM.Gameplay;
 using UnityEditor;
 using UnityEngine;

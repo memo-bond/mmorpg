@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Creator_Kit___RPG.Scripts.Gameplay;
 using Google.Protobuf;
 using NativeWebSocket;
 using UnityEngine;
@@ -7,7 +8,7 @@ namespace Creator_Kit___RPG.Scripts.Connection
 {
     public class ConnectionManager : MonoBehaviour
     {
-        [SerializeField] private PlayerManager.PlayerManager playerManager;
+        [SerializeField] private PlayerManager playerManager;
         [SerializeField] private WebSocketClientHandler client;
 
         private void Start()
@@ -70,26 +71,25 @@ namespace Creator_Kit___RPG.Scripts.Connection
 
         private void HandleJoinMessage(Join join)
         {
-            Move move = new()
-            {
-                Id = join.Id,
-                Name = join.Name,
-                X = join.X,
-                Y = join.Y
-            };
-            playerManager.AddPlayer(move);
+            playerManager.AddPlayer(join);
         }
 
         private void HandleMoveMessage(Move move)
         {
             Debug.Log($"Player move {move.Id}-X={move.X}-Y={move.Y}");
 
-            var addPlayer = playerManager.AddPlayer(move);
-            if (addPlayer)
+            if (playerManager.NotExists(move.Id))
             {
-                Debug.Log($"Player ID {move.Id} already added, update move only");
+                Join join = new()
+                {
+                    Id = move.Id,
+                    Name = move.Name,
+                    X = move.X,
+                    Y = move.Y,
+                    Unity = true
+                };
+                playerManager.AddPlayer(join);
             }
-
             playerManager.UpdatePlayerPosition(move);
         }
 

@@ -68,7 +68,7 @@ public class AOISystemImpl extends BaseAOISystem {
         if (column != null) {
             GridCell cell = column.get(cellY);
             if (cell != null) {
-                cell.getPlayers().remove(player);
+                cell.getPlayers().remove(id);
                 if (cell.getPlayers().isEmpty()) {
                     column.remove(cellY);
                 }

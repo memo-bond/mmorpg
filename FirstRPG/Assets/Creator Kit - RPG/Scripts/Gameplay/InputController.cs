@@ -1,16 +1,15 @@
+using Creator_Kit___RPG.Scripts.Core;
 using RPGM.Core;
-using RPGM.Gameplay;
 using UnityEngine;
 
-namespace RPGM.UI
+namespace Creator_Kit___RPG.Scripts.Gameplay
 {
     /// <summary>
     /// Sends user input to the correct control systems.
     /// </summary>
     public class InputController : MonoBehaviour
     {
-        public float stepSize = 0.1f;
-        GameModel model = Schedule.GetModel<GameModel>();
+        [SerializeField] private GameModel model = Schedule.GetModel<GameModel>();
 
         public enum State
         {
@@ -19,13 +18,13 @@ namespace RPGM.UI
             Pause
         }
 
-        State state;
+        private State _state;
 
-        public void ChangeState(State state) => this.state = state;
+        public void ChangeState(State state) => _state = state;
 
-        void Update()
+        private void Update()
         {
-            switch (state)
+            switch (_state)
             {
                 case State.CharacterControl:
                     CharacterControl();
@@ -36,7 +35,7 @@ namespace RPGM.UI
             }
         }
 
-        void DialogControl()
+        private void DialogControl()
         {
             model.player.nextMoveCommand = Vector3.zero;
             if (Input.GetKeyDown(KeyCode.LeftArrow))
@@ -47,16 +46,16 @@ namespace RPGM.UI
                 model.dialog.SelectActiveButton();
         }
 
-        void CharacterControl()
+        private void CharacterControl()
         {
             if (Input.GetKey(KeyCode.UpArrow))
-                model.player.nextMoveCommand = Vector3.up * stepSize;
+                model.player.nextMoveCommand = Vector3.up * Constants.StepSize;
             else if (Input.GetKey(KeyCode.DownArrow))
-                model.player.nextMoveCommand = Vector3.down * stepSize;
+                model.player.nextMoveCommand = Vector3.down * Constants.StepSize;
             else if (Input.GetKey(KeyCode.LeftArrow))
-                model.player.nextMoveCommand = Vector3.left * stepSize;
+                model.player.nextMoveCommand = Vector3.left * Constants.StepSize;
             else if (Input.GetKey(KeyCode.RightArrow))
-                model.player.nextMoveCommand = Vector3.right * stepSize;
+                model.player.nextMoveCommand = Vector3.right * Constants.StepSize;
             else
                 model.player.nextMoveCommand = Vector3.zero;
         }

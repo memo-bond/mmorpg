@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using RPGM.Core;
+using RPGM.Gameplay;
 using RPGM.UI;
 using UnityEngine;
 
-namespace RPGM.Gameplay
+namespace Creator_Kit___RPG.Scripts.Gameplay
 {
     /// <summary>
     /// This class implements quests.
@@ -28,7 +29,7 @@ namespace RPGM.Gameplay
         public ConversationScript questInProgressConversation, questCompletedConversation;
 
         public SpawnMode spawnMode = SpawnMode.CloneAndEnable;
-        bool disableItemsOnStart = true;
+        private const bool DisableItemsOnStart = true;
 
         public GameObject[] enableOnQuestStart;
         public GameObject[] spawnOnQuestStart;
@@ -40,7 +41,7 @@ namespace RPGM.Gameplay
 
         public Cutscene introCutscenePrefab, outroCutscenePrefab;
 
-        List<GameObject> cleanup = new List<GameObject>();
+        private readonly List<GameObject> _cleanup = new();
 
         public bool isStarted = false;
         public bool isFinished = false;
@@ -50,7 +51,7 @@ namespace RPGM.Gameplay
         void Awake()
         {
             //if required, make sure that items that will be enabled by this quest are disabled
-            if (disableItemsOnStart)
+            if (DisableItemsOnStart)
             {
                 if (enableOnQuestStart != null)
                     foreach (var i in enableOnQuestStart)
@@ -72,17 +73,17 @@ namespace RPGM.Gameplay
         public void OnStartQuest()
         {
             isFinished = false;
-            if (introCutscenePrefab != null)
+            if (introCutscenePrefab)
             {
                 var cs = Instantiate(introCutscenePrefab);
-                if (cs.audioClip != null)
+                if (cs.audioClip)
                 {
                     cs.OnFinish += (i) => model.musicController.CrossFade(model.musicController.audioClip);
                 }
             }
             if (enableOnQuestStart != null)
                 foreach (var i in enableOnQuestStart)
-                    if (i != null)
+                    if (i)
                         i.SetActive(true);
             switch (spawnMode)
             {
@@ -91,14 +92,14 @@ namespace RPGM.Gameplay
                     {
                         var clone = GameObject.Instantiate(i);
                         clone.SetActive(true);
-                        if (destroySpawnsOnQuestComplete) cleanup.Add(clone);
+                        if (destroySpawnsOnQuestComplete) _cleanup.Add(clone);
                     }
                     break;
                 case SpawnMode.CloneOnly:
                     foreach (var i in spawnOnQuestStart)
                     {
                         var clone = GameObject.Instantiate(i);
-                        if (destroySpawnsOnQuestComplete) cleanup.Add(clone);
+                        if (destroySpawnsOnQuestComplete) _cleanup.Add(clone);
                     }
                     break;
             }
@@ -140,7 +141,7 @@ namespace RPGM.Gameplay
         {
             if (destroySpawnsOnQuestComplete)
             {
-                foreach (var i in cleanup)
+                foreach (var i in _cleanup)
                 {
                     if (i != null) Destroy(i);
                 }

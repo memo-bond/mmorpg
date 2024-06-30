@@ -24,8 +24,8 @@ public class QuitHandler extends BaseHandler<PlayerActions.Quit> implements Hand
     public void handle(ChannelHandlerContext ctx) {
         if (msg instanceof PlayerActions.Quit quit) {
             log.info("QUIT action player ID {}", quit.getId());
-            aoiSystem.removePlayer(quit.getId());
             playerService.handlePlayerDisconnect(aoiSystem.getPlayerById(quit.getId()));
+            aoiSystem.removePlayer(quit.getId());
             response(ctx);
         }
     }
