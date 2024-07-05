@@ -10,39 +10,48 @@ namespace Creator_Kit___RPG.Scripts.Tiles
     {
         private Tilemap _tilemap;
         private Grid _grid;
-        private const int Width = 20;
-        public int height = 10;
 
         private readonly List<string> _tileAddressKeys = new()
             { "Assets/Creator Kit - RPG/Art/Sprites/Environment/Fence.png[Fence_4]" };
 
-        void Start()
+        private void Start()
         {
+            CreateGrid();
             CreateTilemap();
             GenerateTilemap();
+        }
+
+        private void CreateGrid()
+        {
+            Debug.Log("Create Grid GameObject");
+            var gridObject = new GameObject("Grid", typeof(Grid));
+            gridObject.transform.SetParent(transform);
+            gridObject.transform.localPosition = Vector3.zero;
+            _grid = gridObject.GetComponent<Grid>();
         }
 
         private void CreateTilemap()
         {
             Debug.Log("Create Tilemap GameObject");
             var tilemapObject = new GameObject("Tilemap", typeof(Tilemap), typeof(TilemapRenderer));
-            tilemapObject.transform.SetParent(transform);
+            tilemapObject.transform.SetParent(_grid.transform);
             tilemapObject.transform.localPosition = Vector3.zero;
             _tilemap = tilemapObject.GetComponent<Tilemap>();
         }
 
         private void GenerateTilemap()
         {
-            for (var x = 0; x < Width; x++)
+            var numFences = 10;
+            for (var i = 0; i < numFences; i++)
             {
-                var tileKey = _tileAddressKeys[Random.Range(0, _tileAddressKeys.Count)];
-                var x1 = x;
+                var tileKey = _tileAddressKeys[0];
+                var localX = i;
+
                 Addressables.LoadAssetAsync<Sprite>(tileKey).Completed += handle =>
                 {
                     if (handle.Status == AsyncOperationStatus.Succeeded)
                     {
-                        var pos = new Vector3Int(x1, 0, 0);
-                        Debug.Log($"Add tile at {pos}");
+                        var pos = new Vector3Int(localX, 0, 0);
                         var sprite = handle.Result;
                         var tile = ScriptableObject.CreateInstance<Tile>();
                         tile.sprite = sprite;
